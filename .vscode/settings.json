@@ -1,0 +1,6 @@
+{
+  "python.defaultInterpreterPath": "/Users/mishragini/Desktop/Grabpic/api-server/venv/bin/python3.14",
+  "python.analysis.extraPaths": [
+    "/Users/mishragini/Desktop/Grabpic/api-server/venv/lib/python3.14/site-packages"
+  ]
+}
