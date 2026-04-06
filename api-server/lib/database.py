@@ -1,6 +1,6 @@
 from supabase import create_client, Client
 from dotenv import load_dotenv
-from config import settings
+from lib.config import settings
 
 load_dotenv()
 

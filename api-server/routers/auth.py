@@ -1,16 +1,14 @@
-from fastapi import APIRouter,HTTPException
+from fastapi import APIRouter,HTTPException,Response
 from pydantic import BaseModel,EmailStr
 from enum import Enum
-from database import supabase
+from lib.database import supabase
 from jose import jwt
-from config import settings
+from lib.config import settings
 from typing import cast
 import bcrypt
 import os
 
 auth_router= APIRouter()
-
-ALGORITHM = "HS256"
 
 class Role(str,Enum):
     organizer="organizer"
@@ -28,8 +26,7 @@ class LoginRequest(BaseModel):
     password:str
 
 @auth_router.post("/signup")
-async def signup(user:SignupRequest):
-    
+async def signup(user:SignupRequest,response:Response):
     existing_user = supabase.table("users")\
            .select("*")\
            .or_(f"email.eq.{user.email},username.eq.{user.username}")\
@@ -50,12 +47,14 @@ async def signup(user:SignupRequest):
     
     new_user_data: dict = cast(dict, new_user.data[0]) 
     
-    token = jwt.encode({"user_id":new_user_data["id"]},settings.JWT_SECRET_KEY,ALGORITHM)
+    token = jwt.encode({"user_id":new_user_data["id"]},settings.JWT_SECRET_KEY,settings.ALGORITHM)
     
-    return{"token":token,"user_id":new_user_data["id"],"role":new_user_data["role"]}
+    response.set_cookie(key="auth-token",value=token)
+    
+    return{"message":"User registered successfully!","data":{"token":token,"user_id":new_user_data["id"],"role":new_user_data["role"]}}
 
 @auth_router.post("/login")
-async def login(user:LoginRequest):
+async def login(user:LoginRequest,response:Response):
     existing_user= supabase.table("users")\
         .select("hashed_password","id","role")\
         .eq("username",user.username)\
@@ -67,7 +66,9 @@ async def login(user:LoginRequest):
     if not existing_user or not password_match:
         raise HTTPException(status_code=400,detail="Invalid Credentials")
     
-    token = jwt.encode({"user_id":existing_user_data["id"]},settings.JWT_SECRET_KEY,ALGORITHM)
+    token = jwt.encode({"user_id":existing_user_data["id"]},settings.JWT_SECRET_KEY,settings.ALGORITHM)
     
-    return{"token":token,"user_id":existing_user_data["id"],"role":existing_user_data["role"]}
+    response.set_cookie(key="auth-token",value=token)
+    
+    return{"message":"Logged in successfully","data" : {"token":token,"user_id":existing_user_data["id"],"role":existing_user_data["role"]}}
     

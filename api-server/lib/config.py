@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     SUPABASE_ANON_KEY:str= Field(init=False)
     SUPABASE_SERVICE_ROLE_KEY:str  = Field(init=False)
     JWT_SECRET_KEY:str= Field(init=False)
+    ALGORITHM : str = "HS256"
     
     class Config:
         env_file=".env"
