@@ -1,7 +1,8 @@
 from fastapi import Request,HTTPException
-from jose import jwt,JWTError
+import jwt
 from lib.config import settings
 from lib.database import supabase
+from lib.types import Role
 from typing import cast 
 
 async def authMiddleware(request:Request):
@@ -10,8 +11,7 @@ async def authMiddleware(request:Request):
         raise HTTPException(status_code=401,detail="Unauthenticated!")
     try:
         decoded_token = jwt.decode(auth_token,settings.JWT_SECRET_KEY,settings.ALGORITHM)
-        print("decoded_token",decoded_token)
-    except JWTError:
+    except:
         raise HTTPException(status_code=401,detail="Invalid token!")    
   
     user = supabase.table("users")\
@@ -25,5 +25,13 @@ async def authMiddleware(request:Request):
     user_data:dict = cast(dict,user.data[0])        
     request.state.user = user_data    
     
-    return; 
+    return 
+
+async def organizerMiddleware(request:Request):
+    user = request.state.user
+    
+    if not user or not user["role"] == Role.organizer:
+        raise HTTPException(status_code=401, detail="Access denied")
+    
+    return
             

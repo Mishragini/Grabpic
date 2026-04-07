@@ -1,18 +1,14 @@
 from fastapi import APIRouter,HTTPException,Response
 from pydantic import BaseModel,EmailStr
-from enum import Enum
+from lib.types import Role
 from lib.database import supabase
-from jose import jwt
+import jwt
 from lib.config import settings
 from typing import cast
 import bcrypt
 import os
 
 auth_router= APIRouter()
-
-class Role(str,Enum):
-    organizer="organizer"
-    attendee="attendee"
 
 class SignupRequest(BaseModel):
     username: str
@@ -39,7 +35,7 @@ async def signup(user:SignupRequest,response:Response):
     
     new_user = supabase.table("users").insert({
         "username": user.username,
-       "email":user.email,
+        "email":user.email,
         "hashed_password": hashed_password,
         "role":user.role,
         "full_name":user.full_name
@@ -47,7 +43,7 @@ async def signup(user:SignupRequest,response:Response):
     
     new_user_data: dict = cast(dict, new_user.data[0]) 
     
-    token = jwt.encode({"user_id":new_user_data["id"]},settings.JWT_SECRET_KEY,settings.ALGORITHM)
+    token = jwt.encode({"user_id":new_user_data["id"],"role":new_user_data["role"]},settings.JWT_SECRET_KEY,settings.ALGORITHM)
     
     response.set_cookie(key="auth-token",value=token)
     
@@ -66,7 +62,7 @@ async def login(user:LoginRequest,response:Response):
     if not existing_user or not password_match:
         raise HTTPException(status_code=400,detail="Invalid Credentials")
     
-    token = jwt.encode({"user_id":existing_user_data["id"]},settings.JWT_SECRET_KEY,settings.ALGORITHM)
+    token = jwt.encode({"user_id":existing_user_data["id"],"role":existing_user_data["role"]},settings.JWT_SECRET_KEY,settings.ALGORITHM)
     
     response.set_cookie(key="auth-token",value=token)
     
