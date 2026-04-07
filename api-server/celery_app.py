@@ -13,7 +13,7 @@ celery_app = Celery(
 )
 
 @celery_app.task
-def _process_photo(storage_path:str,photo_id:str):
+def _process_photo(storage_path:str,photo_id:str,event_id:str):
     #fetch the image bytes from supabase storage
     image_bytes = supabase.storage.from_("photos").download(storage_path)
     #convert the image bytes to image array for cv2 to decode 
@@ -58,7 +58,7 @@ def _process_photo(storage_path:str,photo_id:str):
             face_crop = image[y1:y2,x1:x2]   
             _,buffer = cv2.imencode(".jpg",face_crop)
             face_bytes = buffer.tobytes()
-            face_crop_path = f"{uuid.uuid4()}/{storage_path.replace('/','_')}.jpeg"
+            face_crop_path = f"{uuid.uuid4()}/{storage_path.replace('/','_')}"
             
             # filter on the basis of detection confifence -> store it in inconclsive storage for the orgnizer to review
             if face.detection_confidence < 0.7:
@@ -67,6 +67,12 @@ def _process_photo(storage_path:str,photo_id:str):
                     face_bytes,
                     {"content-type": "image/jpeg"}
                 )
+                supabase.table("face_crops").insert({
+                    "photo_id":photo_id,
+                    "storage_path":face_crop_path,
+                    "event_id":event_id,
+                    "embedding":embedding_list
+                }).execute()
             else:
                 supabase.storage.from_("face-crops").upload(
                     face_crop_path,
@@ -76,6 +82,7 @@ def _process_photo(storage_path:str,photo_id:str):
                 db_response= supabase.table("face_profiles").insert({
                     "embedding":embedding_list,
                     "photo_id":photo_id,
+                    "event_id":event_id,
                     "representative_crop_path":face_crop_path
                 }).execute()
                 profile = cast(dict,db_response.data[0]) 

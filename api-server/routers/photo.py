@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Request,Depends,File,UploadFile,HTTPException,Form
+from fastapi import APIRouter,Depends,File,UploadFile,HTTPException,Form,Query
 from lib.middleware import authMiddleware,organizerMiddleware
 from lib.database import supabase
 from typing import Annotated,cast
@@ -59,6 +59,17 @@ async def upload(photos:Annotated[list[UploadFile],File()],event_id:Annotated[st
         photo_record = cast(dict,db_response.data[0])
         
         #send for processing to task
-        process_photo.delay(storage_path,photo_record["id"])
+        process_photo.delay(storage_path,photo_record["id"],event_id)
         
-    return {"message":"Processing Photo"}    
+    return {"message":"Processing Photo"}
+
+@photo_router.get("/face-crops")
+async def fetch_inconclusive_face_crops(event_id:Annotated[str,Query()]):
+    db_res = supabase.table("face_crops")\
+        .select("*")\
+            .eq("event_id",event_id)\
+                .eq("processed",False)\
+                .execute()
+    face_crops = cast(list[dict],db_res.data)
+    return {"message":"Crops fetched successfully!","data":face_crops}
+    

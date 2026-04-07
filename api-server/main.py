@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from routers.auth import auth_router
 from routers.space import space_router
 from routers.photo import photo_router
+from routers.profiles import profile_router
 
 app = FastAPI()
 
@@ -18,6 +19,7 @@ app.add_middleware(
 app.include_router(auth_router,prefix="/api/auth")
 app.include_router(space_router,prefix="/api/spaces")
 app.include_router(photo_router,prefix="/api/photos")
+app.include_router(profile_router,prefix="/api/profiles")
 
 @app.get("/")
 async def root():
