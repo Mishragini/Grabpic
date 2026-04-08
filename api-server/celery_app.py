@@ -10,6 +10,7 @@ import uuid
 celery_app = Celery(
     "grabpic",
     broker="redis://localhost:6379/0",
+    backend="redis://localhost:6379/1" 
 )
 
 @celery_app.task
@@ -45,10 +46,10 @@ def _process_photo(storage_path:str,photo_id:str,event_id:str):
             "match_threshold": 0.45,
         }).execute()
         
-        matches = cast(list[dict], result.data)
+        match = cast(list[dict], result.data)
 
-        if matches:
-            matched_profile_id = matches[0]["id"]
+        if match:
+            matched_profile_id = match[0]["id"]
         else:
             matched_profile_id = None
                
@@ -100,4 +101,55 @@ def _process_photo(storage_path:str,photo_id:str,event_id:str):
     
     return
 
+
+@celery_app.task
+def _match_photo(image_bytes):
+    image_array = np.frombuffer(image_bytes,dtype=np.uint8)
+    
+    image = cv2.imdecode(image_array,cv2.IMREAD_COLOR)
+    
+    opt = isf.HF_ENABLE_FACE_RECOGNITION
+    session = isf.InspireFaceSession(opt, isf.HF_DETECT_MODE_ALWAYS_DETECT)
+    
+    faces = session.face_detection(image)
+    
+    if not faces:
+        raise ValueError("No face found")
+    
+    if len(faces) > 1:
+        raise ValueError(f"Found multiple faces")
+    
+    
+    embedding = session.face_feature_extract(image,faces[0])
+    embedding_list = embedding.tolist()
+    
+    rpc_res =supabase.rpc("match_face_profile", {
+            "query_embedding": embedding_list,
+            "match_threshold": 0.45,
+        }).execute()
+    
+    match = cast(list[dict], rpc_res.data)
+    
+    if not match:
+        raise ValueError("No matching profile found")
+    
+    profile_id = match[0]["id"]
+    
+    map_db_res = supabase.table("face_photo_map")\
+        .select("photo_id")\
+            .eq("face_profile_id",profile_id)\
+                .execute()
+                
+    map_data = cast(list[dict],map_db_res.data)
+    photo_ids = [row["photo_id"] for row in map_data]
+    
+    photos_db_res = supabase.table("photos")\
+        .select("*")\
+            .in_("id",photo_ids)\
+                .execute()
+    photos = cast(list[dict],photos_db_res.data)            
+    return {"message":"Matching photos fetched successfully","data":photos}                       
+
 process_photo = cast(Task,_process_photo)
+
+match_photo = cast(Task,_match_photo)

@@ -6,9 +6,9 @@ from celery_app import process_photo
 from lib.utils import is_image
 import uuid
     
-photo_router = APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
+organizer_photo_router = APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
 
-@photo_router.post("/upload")
+@organizer_photo_router.post("/upload")
 async def upload(photos:Annotated[list[UploadFile],File()],event_id:Annotated[str,Form()]):
     #check if the files sent are image
     event_res = supabase.table("events")\
@@ -63,7 +63,7 @@ async def upload(photos:Annotated[list[UploadFile],File()],event_id:Annotated[st
         
     return {"message":"Processing Photo"}
 
-@photo_router.get("/face-crops")
+@organizer_photo_router.get("/face-crops")
 async def fetch_inconclusive_face_crops(event_id:Annotated[str,Query()]):
     db_res = supabase.table("face_crops")\
         .select("*")\

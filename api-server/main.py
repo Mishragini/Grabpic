@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from routers.auth import auth_router
 from routers.space import space_router
-from routers.photo import photo_router
+from routers.photo.organizer import organizer_photo_router
+from routers.photo.attendee import attendee_photo_router
 from routers.profiles import profile_router
 
 app = FastAPI()
@@ -18,7 +19,8 @@ app.add_middleware(
 
 app.include_router(auth_router,prefix="/api/auth")
 app.include_router(space_router,prefix="/api/spaces")
-app.include_router(photo_router,prefix="/api/photos")
+app.include_router(organizer_photo_router,prefix="/api/organizer/photos")
+app.include_router(attendee_photo_router,prefix="/api/attendee/photos")
 app.include_router(profile_router,prefix="/api/profiles")
 
 @app.get("/")
