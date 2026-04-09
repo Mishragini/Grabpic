@@ -22,7 +22,7 @@ async def authMiddleware(request:Request):
     if not user.data:
         raise HTTPException(status_code=401, detail="User not found!")
         
-    user_data:dict = cast(dict,user.data[0])        
+    user_data:dict = cast(dict,user.data[0])
     request.state.user = user_data    
     
     return 

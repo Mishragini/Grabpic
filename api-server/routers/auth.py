@@ -1,44 +1,60 @@
-from fastapi import APIRouter,HTTPException,Response
+from fastapi import APIRouter,HTTPException,Response,Request,Depends,File,UploadFile,Form
 from pydantic import BaseModel,EmailStr
 from lib.types import Role
 from lib.database import supabase
-import jwt
 from lib.config import settings
-from typing import cast
+from typing import cast,Annotated,Optional
+from lib.middleware import authMiddleware
+from lib.utils import is_image
+import uuid
+import jwt
 import bcrypt
-import os
 
 auth_router= APIRouter()
-
-class SignupRequest(BaseModel):
-    username: str
-    password:str
-    full_name:str
-    email:EmailStr
-    role: Role
     
 class LoginRequest(BaseModel):
     username:str
     password:str
 
 @auth_router.post("/signup")
-async def signup(user:SignupRequest,response:Response):
+async def signup(response:Response,
+    username: Annotated[str,Form()],
+    password: Annotated[str,Form()],
+    full_name:Annotated[str,Form()],
+    email: Annotated[EmailStr,Form()],
+    role: Role = Form(),
+    image:Annotated[Optional[UploadFile],File()]=None,
+    ):
     existing_user = supabase.table("users")\
            .select("*")\
-           .or_(f"email.eq.{user.email},username.eq.{user.username}")\
+           .or_(f"email.eq.{email},username.eq.{username}")\
            .execute()
            
     if existing_user.data:
         raise HTTPException(status_code=400,detail="User already exists")
+    storage_path = None
+    if image:
+        image_content = await image.read()
+        if not is_image(image_content):
+            raise HTTPException(status_code=400,detail=f"{image.filename} is not a valid image.")
+        storage_path = f"{uuid.uuid4()}image.filename" or f"{uuid.uuid4()}.{image.content_type}"
+        supabase.storage.from_("user-avatars").upload(
+            storage_path,
+            image_content,
+            {"content-type": image.content_type or "image/jpeg"}
+        )
+        
     
-    hashed_password = bcrypt.hashpw(user.password.encode(),bcrypt.gensalt()).decode("utf-8")
+    hashed_password = bcrypt.hashpw(password.encode(),bcrypt.gensalt()).decode("utf-8")
+    
     
     new_user = supabase.table("users").insert({
-        "username": user.username,
-        "email":user.email,
+        "username": username,
+        "email":email,
         "hashed_password": hashed_password,
-        "role":user.role,
-        "full_name":user.full_name
+        "role":role,
+        "full_name":full_name,
+        "avatar":storage_path
     }).execute()
     
     new_user_data: dict = cast(dict, new_user.data[0]) 
@@ -67,4 +83,23 @@ async def login(user:LoginRequest,response:Response):
     response.set_cookie(key="auth-token",value=token)
     
     return{"message":"Logged in successfully","data" : {"token":token,"user_id":existing_user_data["id"],"role":existing_user_data["role"]}}
+
+
+@auth_router.get("/me",dependencies=[Depends(authMiddleware)])
+async def me(request:Request):
+    user = request.state.user
+    print("user...",user)
     
+    if not user:
+        raise HTTPException(status_code=401,detail="Not authenticated")
+    
+    if user["avatar"]:
+        avatar_url = supabase.storage.from_("user-avatars").get_public_url(user["avatar"])    
+        user["avatar_url"] = avatar_url
+        
+    return{"message":"User fetched successfully","data":user}
+
+@auth_router.get("/logout")
+async def logout(response:Response):
+    response.delete_cookie("auth-token")
+    return {"message":"Logged out successfully!"}
