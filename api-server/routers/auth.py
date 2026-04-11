@@ -88,7 +88,6 @@ async def login(user:LoginRequest,response:Response):
 @auth_router.get("/me",dependencies=[Depends(authMiddleware)])
 async def me(request:Request):
     user = request.state.user
-    print("user...",user)
     
     if not user:
         raise HTTPException(status_code=401,detail="Not authenticated")

@@ -6,21 +6,28 @@ import {
 import { cn } from "#/lib/utils";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { type UseFormSetValue } from "react-hook-form";
+import {
+  type FieldValues,
+  type Path,
+  type PathValue,
+  type UseFormSetValue,
+} from "react-hook-form";
 
-interface StepTwoProps {
-  setValue: UseFormSetValue<{
-    name: string;
-    photos: File[];
-  }>;
+interface StepTwoProps<T extends FieldValues & { photos: File[] }> {
+  setValue: UseFormSetValue<T>;
   photos: File[];
 }
 
-export function StepTwo({ setValue, photos }: StepTwoProps) {
+export function StepTwo<T extends FieldValues & { photos: File[] }>({
+  setValue,
+  photos,
+}: StepTwoProps<T>) {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      console.log("photos...", photos);
-      setValue("photos", [...photos, ...acceptedFiles]);
+      setValue(
+        "photos" as Path<T>,
+        [...photos, ...acceptedFiles] as PathValue<T, Path<T>>,
+      );
     },
     [photos],
   );

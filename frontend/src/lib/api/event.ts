@@ -10,7 +10,7 @@ export const createEvent = async ({ name, photos }: {
         const space_response = await createSpace({ name })
         const event_id = space_response.data.id
         const upload_response = await uploadPhotos(photos, event_id)
-        return upload_response
+        return { ...upload_response, event_id }
     } catch (error) {
         throw new Error(error instanceof AxiosError ? error.response?.data.detail : error instanceof Error ? error.message : "Failed to create Event :(")
     }

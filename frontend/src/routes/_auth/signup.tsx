@@ -73,7 +73,6 @@ export default function SignupComponent() {
   });
 
   const onSubmit: SubmitHandler<signupSchema> = async (data) => {
-    console.log("data..", data);
     const formData = new FormData();
     formData.append("username", data.username);
     formData.append("password", data.password);

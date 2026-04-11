@@ -3,15 +3,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "#/components/ui/dialog";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 export function StepFour({
   task_id,
   total,
+  event_id,
 }: {
   task_id: string;
   total: number;
+  event_id: string;
 }) {
+  const queryClient = useQueryClient();
   const [processed, setProcessed] = useState(0);
   const [completed, setCompleted] = useState(false);
   useEffect(() => {
@@ -28,6 +32,13 @@ export function StepFour({
 
     return () => ws.close();
   }, [task_id]);
+
+  useEffect(() => {
+    if (!completed) return;
+    void queryClient.invalidateQueries({
+      queryKey: ["event-profiles", event_id],
+    });
+  }, [completed, event_id, queryClient]);
   return (
     <div className="space-y-4">
       {completed ? (

@@ -7,20 +7,26 @@ from pydantic import BaseModel,UUID4
 profile_router=APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
 
 @profile_router.get("/")
-async def fetch_profiles(event_id:Annotated[str,Query()]):
+async def fetch_profiles(event_id:Annotated[str,Query()],page:Annotated[int,Query()],per_page:Annotated[int,Query()]):
     event_db_res = supabase.table("events")\
         .select("*")\
             .eq("id",event_id)\
-                .execute()
+                    .execute()
     if not event_db_res.data:
         raise HTTPException(status_code=404,detail=f"Event with {event_id} not found.") 
               
     profile_db_res = supabase.table("face_profiles")\
-        .select("representative_crop_path")\
+        .select("representative_crop_path","id")\
             .eq("event_id",event_id)\
+                .range(page*per_page,((page+1)* per_page)-1)\
                 .execute()
     
     profile_data = cast(list[dict],profile_db_res.data)
+    
+    if profile_data:
+        for profile in profile_data:
+            url = supabase.storage.from_("face-crops").get_public_url(profile["representative_crop_path"])
+            profile["photo_url"] = url
     
     return{"message":"Profiles fetched successfully","data":profile_data}
 

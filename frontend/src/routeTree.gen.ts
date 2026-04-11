@@ -13,6 +13,7 @@ import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as ProtectedIndexRouteImport } from './routes/_protected/index'
 import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as ProtectedEventEventIdRouteImport } from './routes/_protected/event.$eventId'
 import { Route as ProtectedOrganizerDashboardRouteImport } from './routes/_protected/_organizer/dashboard'
 import { Route as ProtectedAttendeeSelfieRouteImport } from './routes/_protected/_attendee/selfie'
 
@@ -35,6 +36,11 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtectedEventEventIdRoute = ProtectedEventEventIdRouteImport.update({
+  id: '/event/$eventId',
+  path: '/event/$eventId',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedOrganizerDashboardRoute =
   ProtectedOrganizerDashboardRouteImport.update({
     id: '/_organizer/dashboard',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof AuthSignupRoute
   '/selfie': typeof ProtectedAttendeeSelfieRoute
   '/dashboard': typeof ProtectedOrganizerDashboardRoute
+  '/event/$eventId': typeof ProtectedEventEventIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/': typeof ProtectedIndexRoute
   '/selfie': typeof ProtectedAttendeeSelfieRoute
   '/dashboard': typeof ProtectedOrganizerDashboardRoute
+  '/event/$eventId': typeof ProtectedEventEventIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -69,12 +77,19 @@ export interface FileRoutesById {
   '/_protected/': typeof ProtectedIndexRoute
   '/_protected/_attendee/selfie': typeof ProtectedAttendeeSelfieRoute
   '/_protected/_organizer/dashboard': typeof ProtectedOrganizerDashboardRoute
+  '/_protected/event/$eventId': typeof ProtectedEventEventIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/signup' | '/selfie' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/selfie'
+    | '/dashboard'
+    | '/event/$eventId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/signup' | '/' | '/selfie' | '/dashboard'
+  to: '/login' | '/signup' | '/' | '/selfie' | '/dashboard' | '/event/$eventId'
   id:
     | '__root__'
     | '/_protected'
@@ -83,6 +98,7 @@ export interface FileRouteTypes {
     | '/_protected/'
     | '/_protected/_attendee/selfie'
     | '/_protected/_organizer/dashboard'
+    | '/_protected/event/$eventId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -121,6 +137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_protected/event/$eventId': {
+      id: '/_protected/event/$eventId'
+      path: '/event/$eventId'
+      fullPath: '/event/$eventId'
+      preLoaderRoute: typeof ProtectedEventEventIdRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/_organizer/dashboard': {
       id: '/_protected/_organizer/dashboard'
       path: '/dashboard'
@@ -142,12 +165,14 @@ interface ProtectedRouteChildren {
   ProtectedIndexRoute: typeof ProtectedIndexRoute
   ProtectedAttendeeSelfieRoute: typeof ProtectedAttendeeSelfieRoute
   ProtectedOrganizerDashboardRoute: typeof ProtectedOrganizerDashboardRoute
+  ProtectedEventEventIdRoute: typeof ProtectedEventEventIdRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedIndexRoute: ProtectedIndexRoute,
   ProtectedAttendeeSelfieRoute: ProtectedAttendeeSelfieRoute,
   ProtectedOrganizerDashboardRoute: ProtectedOrganizerDashboardRoute,
+  ProtectedEventEventIdRoute: ProtectedEventEventIdRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(

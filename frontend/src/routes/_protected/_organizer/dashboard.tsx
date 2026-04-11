@@ -1,24 +1,40 @@
+import { EventCard } from "#/components/organizer/Event/EventCard";
 import EventDialog from "#/components/organizer/Event/EventDialog";
-import { Card, CardHeader } from "#/components/ui/card";
 import { getSpaces } from "#/lib/api/space";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { Loader2 } from "lucide-react";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 export const Route = createFileRoute("/_protected/_organizer/dashboard")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { data, isFetching } = useInfiniteQuery({
-    queryKey: ["spaces"],
-    queryFn: ({ pageParam }) => getSpaces(pageParam, 10),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, pages) =>
-      lastPage.length === 10 ? pages.length : undefined,
-  });
+  const { data, fetchNextPage, hasNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey: ["spaces"],
+      queryFn: ({ pageParam }) => getSpaces(pageParam, 24),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, pages) =>
+        lastPage.length === 24 ? pages.length : undefined,
+    });
 
-  if (isFetching) {
-    return <div>Loading....</div>;
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2
+            className="size-7 animate-spin text-muted-foreground"
+            strokeWidth={1.5}
+            aria-hidden
+          />
+          <p className="text-xs font-medium tracking-wide text-muted-foreground">
+            Loading events
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (data?.pages[0]?.length <= 0) {
@@ -34,11 +50,35 @@ function RouteComponent() {
       <div className="flex justify-end items-center">
         <EventDialog />
       </div>
-      {data?.pages.flat().map((event) => (
-        <Card className="max-w-xs">
-          <CardHeader>{event.name}</CardHeader>
-        </Card>
-      ))}
+      <InfiniteScroll
+        dataLength={data?.pages.flat().length!}
+        next={fetchNextPage}
+        hasMore={!!hasNextPage}
+        loader={
+          <div
+            className="flex min-h-[min(280px,45vh)] w-full flex-col items-center justify-center py-8"
+            role="status"
+            aria-live="polite"
+          >
+            <div className="flex flex-col items-center gap-2.5  px-8 py-5 ">
+              <Loader2
+                className="size-5 animate-spin text-muted-foreground"
+                strokeWidth={1.5}
+                aria-hidden
+              />
+              <span className="text-xs font-medium text-muted-foreground">
+                Loading more
+              </span>
+            </div>
+          </div>
+        }
+      >
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 overflow-y-auto">
+          {data?.pages.flat().map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
+        </div>
+      </InfiniteScroll>
     </div>
   );
 }

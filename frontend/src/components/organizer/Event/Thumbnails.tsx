@@ -1,6 +1,11 @@
 import { Button } from "#/components/ui/button";
 import { useCallback, useEffect, useMemo } from "react";
-import type { UseFormSetValue } from "react-hook-form";
+import type {
+  FieldValues,
+  Path,
+  PathValue,
+  UseFormSetValue,
+} from "react-hook-form";
 import { XIcon } from "lucide-react";
 
 function PhotoThumbnail({
@@ -33,20 +38,17 @@ function PhotoThumbnail({
   );
 }
 
-export function Thumbnails({
+export function Thumbnails<T extends FieldValues & { photos: File[] }>({
   photos,
   setValue,
 }: {
   photos: File[];
-  setValue: UseFormSetValue<{
-    name: string;
-    photos: File[];
-  }>;
+  setValue: UseFormSetValue<T>;
 }) {
   const removePhoto = useCallback(
     (index: number) => {
       const filtered_photos = photos.filter((_, i) => i !== index);
-      setValue("photos", filtered_photos);
+      setValue("photos" as Path<T>, filtered_photos as PathValue<T, Path<T>>);
     },
     [photos, setValue],
   );

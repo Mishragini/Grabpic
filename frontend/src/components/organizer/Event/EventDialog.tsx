@@ -30,6 +30,7 @@ export default function EventDialog() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [task_id, setTaskId] = useState<string | null>(null);
+  const [createdEventId, setCreatedEventId] = useState<string | null>(null);
   const createEventLoadingId = useRef<null | number | string>(null);
   const {
     register,
@@ -55,19 +56,18 @@ export default function EventDialog() {
       createEventLoadingId.current = null;
     },
     onSuccess: (data) => {
-      const task_id = data.task_id;
       createEventLoadingId.current &&
         toast.dismiss(createEventLoadingId.current);
       toast.success("Event created!");
       setStep((c) => c + 1);
-      setTaskId(task_id);
+      setTaskId(data.task_id);
+      setCreatedEventId(data.event_id);
       createEventLoadingId.current = null;
     },
   });
 
   const handleCreateEvent: SubmitHandler<createEventSchema> = useCallback(
     async (data) => {
-      console.log("here");
       createEventLoadingId.current = toast.loading("Creating Event...");
       mutate(data);
     },
@@ -99,6 +99,7 @@ export default function EventDialog() {
           setOpen(true);
           setStep(0);
           setTaskId(null);
+          setCreatedEventId(null);
           reset();
         }}
       >
@@ -128,8 +129,12 @@ export default function EventDialog() {
               {step === 0 && <StepOne register={register} errors={errors} />}
               {step === 1 && <StepTwo setValue={setValue} photos={photos} />}
               {step === 2 && <StepThree event_name={name} photos={photos} />}
-              {step === 3 && task_id && (
-                <StepFour task_id={task_id} total={photos.length} />
+              {step === 3 && task_id && createdEventId && (
+                <StepFour
+                  task_id={task_id}
+                  total={photos.length}
+                  event_id={createdEventId}
+                />
               )}
               {photos.length > 0 && step > 0 && step <= 2 && (
                 <Thumbnails photos={photos} setValue={setValue} />
