@@ -2,7 +2,7 @@ import ThemeToggle from "./ThemeToggle";
 import { useAppDispatch, useAppSelector } from "#/redux/hooks";
 import { Button } from "./ui/button";
 import { useNavigate } from "@tanstack/react-router";
-import { logout } from "#/lib/apiCall";
+import { logout } from "#/lib/api/auth";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { clearUser } from "#/redux/userSlice";

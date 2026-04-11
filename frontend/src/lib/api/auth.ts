@@ -1,28 +1,12 @@
-import { getRouter } from '#/router'
-import axios, { AxiosError } from 'axios'
-
-const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    withCredentials: true
-})
-
-api.interceptors.response.use(
-    res => res,
-    err => {
-        if (err.response?.status === 401) {
-            const router = getRouter()
-            router.navigate({ to: "/login" })
-        }
-        return Promise.reject(err)
-    }
-)
+import { AxiosError } from "axios";
+import api from "./apiCall";
 
 export const fetchUser = async () => {
     try {
         const api_response = await api.get("api/auth/me")
         return api_response.data
     } catch (error) {
-        throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Error while fetching user!");
+        throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Error while fetching user :(");
     }
 
 }
@@ -40,7 +24,7 @@ export const signup = async (data: FormData) => {
         )
         return api_response.data
     } catch (error) {
-        throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Signup Failed!");
+        throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Signup Failed :(");
     }
 
 }
@@ -50,7 +34,7 @@ export const login = async (data: { username: string, password: string }) => {
         const response = await api.post("/api/auth/login", data)
         return response.data
     } catch (error) {
-        throw new Error(error instanceof AxiosError ? error.message : "Failed to login")
+        throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Failed to login :(")
     }
 }
 
@@ -59,8 +43,6 @@ export const logout = async () => {
         const response = await api.get("/api/auth/logout")
         return response.data
     } catch (error) {
-        throw new Error(error instanceof AxiosError ? error.message : "Failed to logout!")
+        throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Failed to logout :(")
     }
 }
-
-export default api

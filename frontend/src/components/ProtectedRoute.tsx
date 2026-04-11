@@ -1,4 +1,4 @@
-import { fetchUser } from "#/lib/apiCall";
+import { fetchUser } from "#/lib/api/auth";
 import { useAppDispatch } from "#/redux/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, type ReactNode } from "react";
@@ -18,8 +18,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   });
   useEffect(() => {
     if (data) {
-       const { id: user_id, username, avatar_url, role } = data;
-       dispatch(updateUser({ user_id, username, avatar_url, role }));
+      const { id: user_id, username, avatar_url, role } = data;
+      dispatch(updateUser({ user_id, username, avatar_url, role }));
     }
   }, [data]);
   if (isLoading) return <div>Loading...</div>;

@@ -13,6 +13,8 @@ import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as ProtectedIndexRouteImport } from './routes/_protected/index'
 import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as ProtectedOrganizerDashboardRouteImport } from './routes/_protected/_organizer/dashboard'
+import { Route as ProtectedAttendeeSelfieRouteImport } from './routes/_protected/_attendee/selfie'
 
 const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
@@ -33,16 +35,31 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtectedOrganizerDashboardRoute =
+  ProtectedOrganizerDashboardRouteImport.update({
+    id: '/_organizer/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
+const ProtectedAttendeeSelfieRoute = ProtectedAttendeeSelfieRouteImport.update({
+  id: '/_attendee/selfie',
+  path: '/selfie',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof ProtectedIndexRoute
   '/login': typeof AuthLoginRoute
   '/signup': typeof AuthSignupRoute
+  '/selfie': typeof ProtectedAttendeeSelfieRoute
+  '/dashboard': typeof ProtectedOrganizerDashboardRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
   '/signup': typeof AuthSignupRoute
   '/': typeof ProtectedIndexRoute
+  '/selfie': typeof ProtectedAttendeeSelfieRoute
+  '/dashboard': typeof ProtectedOrganizerDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,18 +67,22 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/signup': typeof AuthSignupRoute
   '/_protected/': typeof ProtectedIndexRoute
+  '/_protected/_attendee/selfie': typeof ProtectedAttendeeSelfieRoute
+  '/_protected/_organizer/dashboard': typeof ProtectedOrganizerDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/signup'
+  fullPaths: '/' | '/login' | '/signup' | '/selfie' | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/signup' | '/'
+  to: '/login' | '/signup' | '/' | '/selfie' | '/dashboard'
   id:
     | '__root__'
     | '/_protected'
     | '/_auth/login'
     | '/_auth/signup'
     | '/_protected/'
+    | '/_protected/_attendee/selfie'
+    | '/_protected/_organizer/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -100,15 +121,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_protected/_organizer/dashboard': {
+      id: '/_protected/_organizer/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof ProtectedOrganizerDashboardRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/_attendee/selfie': {
+      id: '/_protected/_attendee/selfie'
+      path: '/selfie'
+      fullPath: '/selfie'
+      preLoaderRoute: typeof ProtectedAttendeeSelfieRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
   }
 }
 
 interface ProtectedRouteChildren {
   ProtectedIndexRoute: typeof ProtectedIndexRoute
+  ProtectedAttendeeSelfieRoute: typeof ProtectedAttendeeSelfieRoute
+  ProtectedOrganizerDashboardRoute: typeof ProtectedOrganizerDashboardRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedIndexRoute: ProtectedIndexRoute,
+  ProtectedAttendeeSelfieRoute: ProtectedAttendeeSelfieRoute,
+  ProtectedOrganizerDashboardRoute: ProtectedOrganizerDashboardRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(

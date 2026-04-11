@@ -4,7 +4,7 @@ from lib.database import supabase
 from typing import Annotated,cast
 from celery_app import process_photo
 from lib.utils import is_image
-import uuid
+import base64
     
 organizer_photo_router = APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
 
@@ -25,43 +25,15 @@ async def upload(photos:Annotated[list[UploadFile],File()],event_id:Annotated[st
         contents = await photo.read()
         if not is_image(contents):
             raise HTTPException(status_code=415, detail=f"'{photo.filename}' is not a valid image.")
-        photo_contents.append(contents)
+        photo_contents.append({
+            "filename": photo.filename,
+            "content_type": photo.content_type,
+            "data": base64.b64encode(contents).decode("utf-8")  # JSON-safe
+        })
     
-    #process eah photo
-    for photo, contents in zip(photos, photo_contents):  
-        #upload the photo to supabase storage
-        filename = photo.filename or f"{uuid.uuid4()}.jpg"
-        content_type = photo.content_type or "image/jpeg"
-        storage_path=filename
-        try:
-            supabase.storage.from_('photos').upload(filename, contents, {"content-type": content_type})
-        except Exception as e:
-            if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
-                continue
-            else:
-                raise
-
-        # Check if this photo is already in the db
-        existing = supabase.table("photos")\
-            .select("id")\
-            .eq("storage_path", storage_path)\
-            .execute()
-
-        if existing.data:
-            continue  # already processed, skip
+    task = process_photo.delay(photo_contents,event_id)
         
-        #add it in the db table
-        db_response = supabase.table("photos").insert({
-            "event_id": event_id,
-            "storage_path":storage_path
-        }).execute()
-        
-        photo_record = cast(dict,db_response.data[0])
-        
-        #send for processing to task
-        process_photo.delay(storage_path,photo_record["id"],event_id)
-        
-    return {"message":"Processing Photo"}
+    return {"message":"Processing Photo","task_id":task.id}
 
 @organizer_photo_router.get("/face-crops")
 async def fetch_inconclusive_face_crops(event_id:Annotated[str,Query()]):
