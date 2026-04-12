@@ -5,6 +5,7 @@ import {
 } from "#/components/ui/dialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { TriangleAlertIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export function StepFour({
@@ -19,6 +20,7 @@ export function StepFour({
   const queryClient = useQueryClient();
   const [processed, setProcessed] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [error, setError] = useState(false);
   useEffect(() => {
     const ws = new WebSocket(`ws://localhost:8000/ws/progress/${task_id}`);
     ws.onmessage = (event) => {
@@ -38,6 +40,7 @@ export function StepFour({
         setCompleted(true);
         ws.close();
       } else if (data.error) {
+        setError(true);
         toast.error("Unexpected error while processing.");
         ws.close();
       }
@@ -57,7 +60,38 @@ export function StepFour({
   }, [completed, event_id, queryClient]);
   return (
     <div className="space-y-4">
-      {completed ? (
+      {error ? (
+        <>
+          <DialogHeader className="gap-1.5 text-left">
+            <DialogTitle className="display-title text-lg font-medium tracking-tight">
+              Processing failed
+            </DialogTitle>
+            <DialogDescription>
+              We couldn&apos;t finish processing your photos.
+            </DialogDescription>
+          </DialogHeader>
+          <div
+            className="island-shell rise-in flex gap-3 rounded-xl p-4 ring-1 ring-destructive/20"
+            role="alert"
+          >
+            <div
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive"
+              aria-hidden
+            >
+              <TriangleAlertIcon className="size-5" strokeWidth={2} />
+            </div>
+            <div className="min-w-0 space-y-1">
+              <p className="text-sm font-medium text-foreground">
+                Something went wrong on our end
+              </p>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Close this dialog and try uploading again. If it keeps failing,
+                try a smaller batch or check your connection.
+              </p>
+            </div>
+          </div>
+        </>
+      ) : completed ? (
         <DialogHeader className="gap-1.5 text-left">
           <DialogTitle className="display-title text-lg font-medium tracking-tight">
             All set

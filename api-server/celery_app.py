@@ -25,6 +25,10 @@ def _process_photo(self,photos:list,event_id:str):
     task_id = self.request.id
     try:
         total = len(photos)
+        # Create a session with face recognition features
+        opt = isf.HF_ENABLE_FACE_RECOGNITION
+        session = isf.InspireFaceSession(opt, isf.HF_DETECT_MODE_ALWAYS_DETECT)
+
         #process each photo
         for index,  content in enumerate(photos,start=1):  
             #upload the photo to supabase storage
@@ -69,11 +73,7 @@ def _process_photo(self,photos:list,event_id:str):
 
             if image is None:
                 raise ValueError(f"Failed to decode image from storage path: {storage_path}")
-
-            # Create a session with face recognition features
-            opt = isf.HF_ENABLE_FACE_RECOGNITION
-            session = isf.InspireFaceSession(opt, isf.HF_DETECT_MODE_ALWAYS_DETECT)
-
+                      
             # Perform face detection on the image.
             faces = session.face_detection(image)
 
@@ -100,11 +100,31 @@ def _process_photo(self,photos:list,event_id:str):
                     matched_profile_id = None
 
                 if  matched_profile_id is None:
-                    #get the face crop 
-                    x1,y1,x2,y2=face.location
-                    face_crop = image[y1:y2,x1:x2]   
-                    _,buffer = cv2.imencode(".jpg",face_crop)
-                    face_bytes = buffer.tobytes()
+                     # Get the face crop
+                    x1, y1, x2, y2 = face.location
+
+                    # Convert to int and clamp to image bounds
+                    h, w = image.shape[:2]
+                    x1 = max(0, int(x1))
+                    y1 = max(0, int(y1))
+                    x2 = min(w, int(x2))
+                    y2 = min(h, int(y2))
+
+                    # Guard against zero-area crop
+                    if x2 <= x1 or y2 <= y1:
+                        logging.warning(f"Skipping invalid face crop region: ({x1},{y1},{x2},{y2}) for image shape {image.shape}")
+                        continue  # skip this face, move to next
+                    
+                    face_crop = image[y1:y2, x1:x2]
+
+                    # Double-check crop isn't empty
+                    if face_crop is None or face_crop.size == 0:
+                        logging.warning("face_crop is empty after slicing, skipping")
+                        continue
+                    
+                    _, buffer = cv2.imencode(".jpg", face_crop)
+                    face_bytes = buffer.tobytes()  
+                   
                     face_crop_path = f"{uuid.uuid4()}/{storage_path.replace('/','_')}"
 
                     # filter on the basis of detection confidence -> store it in inconclusive storage for the orgnizer to review

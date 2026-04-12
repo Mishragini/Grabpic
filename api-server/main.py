@@ -31,14 +31,6 @@ app.include_router(profile_router,prefix="/api/profiles")
 async def root():
     return {"message":"Server is up!"}
 
-async def _safe_send(ws: WebSocket, text: str) -> None:
-    try:
-        await ws.send_text(text)
-    except WebSocketDisconnect:
-        raise
-    except Exception:
-        logger.exception("failed to send on progress websocket")
-
 
 @app.websocket("/ws/progress/{task_id}")
 async def websocket_endpoint(websocket:WebSocket,task_id:str):
@@ -50,7 +42,7 @@ async def websocket_endpoint(websocket:WebSocket,task_id:str):
     try:
         latest = await client.get(f"task:{task_id}:latest")
         if latest:
-            await _safe_send(websocket, latest.decode())
+            await websocket.send_text(latest.decode())
     except WebSocketDisconnect:
         await pubsub.unsubscribe(f"task:{task_id}:progress")
         await client.aclose()
@@ -63,15 +55,15 @@ async def websocket_endpoint(websocket:WebSocket,task_id:str):
             if message["type"] == "message":
                 payload = message["data"]
                 if isinstance(payload, bytes):
-                    await _safe_send(websocket, payload.decode())
+                    await websocket.send_text(payload.decode())
                 else:
-                    await _safe_send(websocket, str(payload))
+                    await websocket.send_text(str(payload))
     except WebSocketDisconnect:
         pass
     except Exception:
         logger.exception("progress pubsub stream failed task_id=%s", task_id)
         try:
-            await _safe_send(websocket, json.dumps({"error": True}))
+            await websocket.send_text(json.dumps({"error": True}))
         except WebSocketDisconnect:
             pass
     finally:
