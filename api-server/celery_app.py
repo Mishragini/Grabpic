@@ -1,7 +1,7 @@
 from celery import Celery,Task
 from typing import cast
 from lib.database import supabase
-from typing import cast
+import logging
 import numpy as np
 import inspireface as isf
 import cv2
@@ -158,13 +158,14 @@ def _process_photo(self,photos:list,event_id:str):
                 "processed": index,
                 "total":total
             }))       
-        redis_client.publish(f"task:{task_id}:progress",json.dumps({
-            "completed":True
-        }))
-    except :
-        redis_client.publish(f"task:{task_id}:progress",json.dumps({
-            "error":True
-        }))     
+        done = json.dumps({"completed": True, "processed": total, "total": total})
+        redis_client.set(f"task:{task_id}:latest", done)
+        redis_client.publish(f"task:{task_id}:progress", done)
+    except Exception:
+        logging.exception("process_photo failed task_id=%s event_id=%s", task_id, event_id)
+        err = json.dumps({"error": True})
+        redis_client.set(f"task:{task_id}:latest", err)
+        redis_client.publish(f"task:{task_id}:progress", err)
     return
 
 

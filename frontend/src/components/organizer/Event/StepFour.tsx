@@ -5,6 +5,7 @@ import {
 } from "#/components/ui/dialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export function StepFour({
   task_id,
@@ -21,13 +22,28 @@ export function StepFour({
   useEffect(() => {
     const ws = new WebSocket(`ws://localhost:8000/ws/progress/${task_id}`);
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      const { processed, completed } = data;
-      setProcessed(processed);
-      if (completed) {
+      let data: {
+        processed?: number;
+        completed?: boolean;
+        error?: boolean;
+      };
+      try {
+        data = JSON.parse(event.data) as typeof data;
+      } catch {
+        toast.error("Could not read processing update.");
+        return;
+      }
+      if (typeof data.processed === "number") setProcessed(data.processed);
+      if (data.completed) {
         setCompleted(true);
         ws.close();
+      } else if (data.error) {
+        toast.error("Unexpected error while processing.");
+        ws.close();
       }
+    };
+    ws.onerror = () => {
+      toast.error("Lost connection to processing updates.");
     };
 
     return () => ws.close();
