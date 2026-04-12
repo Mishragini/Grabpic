@@ -1,3 +1,4 @@
+import { InfiniteScrollLoader } from "#/components/InfiniteScrollLoader";
 import { EventCard } from "#/components/organizer/Event/EventCard";
 import EventDialog from "#/components/organizer/Event/EventDialog";
 import { getSpaces } from "#/lib/api/space";
@@ -13,12 +14,12 @@ export const Route = createFileRoute("/_protected/_organizer/dashboard")({
 function RouteComponent() {
   const { data, fetchNextPage, hasNextPage, isLoading } =
     useInfiniteQuery({
-      queryKey: ["spaces"],
-      queryFn: ({ pageParam }) => getSpaces(pageParam, 24),
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, pages) =>
-        lastPage.length === 24 ? pages.length : undefined,
-    });
+    queryKey: ["spaces"],
+    queryFn: ({ pageParam }) => getSpaces(pageParam, 24),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.length === 24 ? pages.length : undefined,
+  });
 
   if (isLoading) {
     return (
@@ -54,24 +55,7 @@ function RouteComponent() {
         dataLength={data?.pages.flat().length!}
         next={fetchNextPage}
         hasMore={!!hasNextPage}
-        loader={
-          <div
-            className="flex min-h-[min(280px,45vh)] w-full flex-col items-center justify-center py-8"
-            role="status"
-            aria-live="polite"
-          >
-            <div className="flex flex-col items-center gap-2.5  px-8 py-5 ">
-              <Loader2
-                className="size-5 animate-spin text-muted-foreground"
-                strokeWidth={1.5}
-                aria-hidden
-              />
-              <span className="text-xs font-medium text-muted-foreground">
-                Loading more
-              </span>
-            </div>
-          </div>
-        }
+        loader={<InfiniteScrollLoader />}
       >
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 overflow-y-auto">
           {data?.pages.flat().map((event) => (

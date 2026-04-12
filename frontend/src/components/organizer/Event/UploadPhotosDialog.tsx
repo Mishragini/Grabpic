@@ -97,9 +97,6 @@ export function UploadPhotoDilaog({ event_id }: { event_id: string }) {
               total={photos.length}
               event_id={event_id}
             />
-            {photos.length > 0 && (
-              <Thumbnails photos={photos} setValue={setValue} />
-            )}
           </div>
         )}
       </DialogContent>

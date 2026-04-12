@@ -18,17 +18,23 @@ async def fetch_profiles(event_id:Annotated[str,Query()],page:Annotated[int,Quer
     profile_db_res = supabase.table("face_profiles")\
         .select("representative_crop_path","id")\
             .eq("event_id",event_id)\
-                .range(page*per_page,((page+1)* per_page)-1)\
+                .range(page*per_page,((page+1)* per_page))\
                 .execute()
     
     profile_data = cast(list[dict],profile_db_res.data)
+    
+    hasMore = False
+    
+    if len(profile_data) > per_page:
+        hasMore = True
+        profile_data.pop()
     
     if profile_data:
         for profile in profile_data:
             url = supabase.storage.from_("face-crops").get_public_url(profile["representative_crop_path"])
             profile["photo_url"] = url
     
-    return{"message":"Profiles fetched successfully","data":profile_data}
+    return{"message":"Profiles fetched successfully","data":profile_data,"hasMore":hasMore}
 
 class RemoveDuplicateProfileReq(BaseModel):
     profile_id:str

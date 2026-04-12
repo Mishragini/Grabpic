@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends,File,UploadFile,HTTPException,Query
+from fastapi import APIRouter,Depends,File,UploadFile,HTTPException,Query,Form
 from lib.middleware import authMiddleware
 from typing import Annotated,cast
 from celery_app import match_photo
@@ -9,9 +9,9 @@ import asyncio
 attendee_photo_router = APIRouter(dependencies=[Depends(authMiddleware)])
 
 @attendee_photo_router.post("/match-selfie")
-async def match_selfie(photo:Annotated[UploadFile,File()]):
+async def match_selfie(photo:Annotated[UploadFile,File()],event_id:Annotated[str,Form()]):
     image_bytes = await photo.read()
-    task = match_photo.delay(image_bytes)
+    task = match_photo.delay(image_bytes,event_id)
     try:
         result = await asyncio.get_event_loop().run_in_executor(None,lambda:task.get(timeout=30,propagate=True))
     except ValueError as e :

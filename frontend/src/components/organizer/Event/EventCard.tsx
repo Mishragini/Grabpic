@@ -5,23 +5,18 @@ import { fetchEventProfiles } from "#/lib/api/profiles";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { UploadPhotoDilaog } from "./UploadPhotosDialog";
-
-interface Profile {
-  representative_crop_path: string;
-  id: string;
-  photo_url: string;
-}
+import { ProfileDialog } from "./ProfileDialog";
+import type { Profile } from "#/lib/types/type";
 
 const PREVIEW_LIMIT = 5;
-
 export function EventCard({ event }: { event: { name: string; id: string } }) {
   const { isLoading, isError, data } = useQuery({
     queryKey: ["event-profiles", event.id],
     queryFn: async () => {
-      const { data } = await fetchEventProfiles(event.id, 0, PREVIEW_LIMIT + 1);
+      const data = await fetchEventProfiles(event.id, 0, PREVIEW_LIMIT);
       return data;
     },
   });
@@ -34,10 +29,14 @@ export function EventCard({ event }: { event: { name: string; id: string } }) {
     }
   }, [isError, event.id]);
 
-  const profiles = data ?? [];
-  const hasMore = profiles.length > PREVIEW_LIMIT;
-  const displayProfiles = hasMore ? profiles.slice(0, PREVIEW_LIMIT) : profiles;
-  const count = displayProfiles.length;
+  const { profiles, count, hasMore } = useMemo(() => {
+    if (!data) return { profiles: [], count: 0, hasMore: false };
+    return {
+      profiles: data.profiles,
+      count: data.profiles.length,
+      hasMore: data.hasMore,
+    };
+  }, [data]);
 
   return (
     <Card
@@ -92,19 +91,29 @@ export function EventCard({ event }: { event: { name: string; id: string } }) {
                     <UploadPhotoDilaog event_id={event.id} />
                   )
                 ) : (
-                  <div className="flex gap-2 items-end">
-                    <div className="flex -space-x-2">
-                      {displayProfiles.map((profile: Profile, i: number) => (
+                  <div>
+                    <div className="flex min-w-0 flex-1 items-center overflow-hidden shrink-0 -space-x-2">
+                      {profiles.map((profile: Profile, i: number) => (
                         <img
                           key={profile.id}
                           src={profile.photo_url}
                           alt=""
-                          className="size-9 rounded-full object-cover shadow-sm ring-1 ring-black/5"
+                          className="relative size-9 shrink-0 rounded-full border-(--foam) object-cover shadow-sm"
                           style={{ zIndex: PREVIEW_LIMIT - i }}
                         />
                       ))}
+                      {hasMore && (
+                        <span
+                          className="inline-flex h-9 shrink-0 items-center px-2.5 text-[0.65rem] font-medium  text-muted-foreground"
+                          title="Additional face profiles in this event"
+                        >
+                          + more
+                        </span>
+                      )}
                     </div>
-                    {hasMore ? <div>+ more</div> : null}
+                    <div className="shrink-0">
+                      <ProfileDialog event_id={event.id} />
+                    </div>
                   </div>
                 )}
               </div>
