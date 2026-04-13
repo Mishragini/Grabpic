@@ -5,10 +5,10 @@ import { useNavigate } from "@tanstack/react-router";
 import { logout } from "#/lib/api/auth";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { clearUser } from "#/redux/userSlice";
+import { clearUser, selectUser } from "#/redux/userSlice";
 
 export default function Header() {
-  const user = useAppSelector((state) => state.user.value);
+  const user = useAppSelector(selectUser);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isPending, mutate } = useMutation({

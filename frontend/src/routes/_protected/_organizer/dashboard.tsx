@@ -1,6 +1,6 @@
-import { InfiniteScrollLoader } from "#/components/InfiniteScrollLoader";
-import { EventCard } from "#/components/organizer/Event/EventCard";
-import EventDialog from "#/components/organizer/Event/EventDialog";
+import { InfiniteScrollLoader } from "#/components/Loaders/InfiniteScrollLoader";
+import { EventCard } from "#/components/organizer/Dashboard/EventCard";
+import EventDialog from "#/components/organizer/Dashboard/EventDialog";
 import { getSpaces } from "#/lib/api/space";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -12,13 +12,12 @@ export const Route = createFileRoute("/_protected/_organizer/dashboard")({
 });
 
 function RouteComponent() {
-  const { data, fetchNextPage, hasNextPage, isLoading } =
-    useInfiniteQuery({
+  const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery({
     queryKey: ["spaces"],
     queryFn: ({ pageParam }) => getSpaces(pageParam, 24),
     initialPageParam: 0,
-    getNextPageParam: (lastPage, pages) =>
-      lastPage.length === 24 ? pages.length : undefined,
+    getNextPageParam: (lastPage, pages, lastPageParam) =>
+      lastPage.length === 24 ? lastPageParam + 1 : undefined,
   });
 
   if (isLoading) {

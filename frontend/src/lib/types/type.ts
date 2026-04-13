@@ -4,4 +4,9 @@ interface Profile {
     photo_url: string;
 }
 
-export type { Profile }
+interface Photo {
+    id: string,
+    image_url: string
+}
+
+export type { Profile, Photo }

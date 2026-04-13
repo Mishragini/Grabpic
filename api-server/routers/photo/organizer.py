@@ -3,7 +3,7 @@ from lib.middleware import authMiddleware,organizerMiddleware
 from lib.database import supabase
 from typing import Annotated,cast
 from celery_app import process_photo
-from lib.utils import is_image
+from lib.utils import is_image,check_event
 import base64
     
 organizer_photo_router = APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
@@ -11,14 +11,7 @@ organizer_photo_router = APIRouter(dependencies=[Depends(authMiddleware),Depends
 @organizer_photo_router.post("/upload")
 async def upload(photos:Annotated[list[UploadFile],File()],event_id:Annotated[str,Form()]):
     #check if the files sent are image
-    event_res = supabase.table("events")\
-           .select("*")\
-               .eq("id",event_id)\
-                   .execute()
-    event_data = cast(dict,event_res.data[0])
-        
-    if not event_data:
-            raise HTTPException(status_code=404,detail="Event not found.")
+    check_event(event_id)
          
     photo_contents=[]
     for photo in photos:
@@ -37,6 +30,7 @@ async def upload(photos:Annotated[list[UploadFile],File()],event_id:Annotated[st
 
 @organizer_photo_router.get("/face-crops")
 async def fetch_inconclusive_face_crops(event_id:Annotated[str,Query()]):
+    check_event(event_id)
     db_res = supabase.table("face_crops")\
         .select("*")\
             .eq("event_id",event_id)\
@@ -45,3 +39,26 @@ async def fetch_inconclusive_face_crops(event_id:Annotated[str,Query()]):
     face_crops = cast(list[dict],db_res.data)
     return {"message":"Crops fetched successfully!","data":face_crops}
     
+@organizer_photo_router.get("/")
+async def fetch_event_photos(event_id:Annotated[str,Query()],page:Annotated[int,Query()]=0,per_page:Annotated[int,Query()]=10):
+    check_event(event_id)
+    
+    photos_db_res = supabase.table("photos")\
+        .select("*")\
+            .eq("event_id",event_id)\
+                .range(page*per_page,(page+1)*per_page)\
+                .execute()
+    
+    photos = cast(list[dict],photos_db_res.data)
+    
+    for photo in photos:
+        url = supabase.storage.from_("photos").get_public_url(photo["storage_path"])
+        photo["image_url"] = url
+        
+    hasMore = False    
+        
+    if len(photos) > per_page:
+        photos.pop()
+        hasMore = True    
+
+    return {"message":f"Photos for event {event_id} fetched successfully","data":photos,"hasMore":hasMore}            

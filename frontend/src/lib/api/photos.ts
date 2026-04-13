@@ -16,3 +16,18 @@ export const uploadPhotos = async (photos: File[], event_id: string) => {
         throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to upload photos :(")
     }
 }
+
+export const fetchEventPhotos = async (event_id: string, page: number, per_page: number) => {
+    try {
+        const api_response = await api.get("/api/organizer/photos", {
+            params: {
+                event_id,
+                page,
+                per_page
+            }
+        })
+        return { data: api_response.data.data, hasMore: api_response.data.hasMore }
+    } catch (error) {
+        throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to fetch photos for the event :(")
+    }
+}

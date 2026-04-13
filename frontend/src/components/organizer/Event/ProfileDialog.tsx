@@ -1,4 +1,4 @@
-import { InfiniteScrollLoader } from "#/components/InfiniteScrollLoader";
+import { InfiniteScrollLoader } from "#/components/Loaders/InfiniteScrollLoader";
 import { Button } from "#/components/ui/button";
 import {
   Dialog,
@@ -11,16 +11,17 @@ import {
 } from "#/components/ui/dialog";
 import { fetchEventProfiles, mergeProfiles } from "#/lib/api/profiles";
 import type { Profile } from "#/lib/types/type";
-import { cn } from "#/lib/utils";
 import {
   useInfiniteQuery,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Check, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { toast } from "sonner";
+import { DialogProfilePreview } from "../DialogProfilesPreview";
+import { KeepProfile } from "../KeepProfile";
 
 export function ProfileDialog({ event_id }: { event_id: string }) {
   const queryClient = useQueryClient();
@@ -33,7 +34,7 @@ export function ProfileDialog({ event_id }: { event_id: string }) {
   const [step, setStep] = useState(0);
 
   const { fetchNextPage, hasNextPage, data, isPending } = useInfiniteQuery({
-    queryKey: ["face-profiles", event_id],
+    queryKey: ["event-profiles", event_id, "paginated"],
     queryFn: ({ pageParam }) => fetchEventProfiles(event_id, pageParam, 6),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
@@ -71,9 +72,6 @@ export function ProfileDialog({ event_id }: { event_id: string }) {
       void queryClient.invalidateQueries({
         queryKey: ["event-profiles", event_id],
       });
-      void queryClient.invalidateQueries({
-        queryKey: ["face-profiles", event_id],
-      });
       resetDialog();
       setOpen(false);
     },
@@ -91,7 +89,9 @@ export function ProfileDialog({ event_id }: { event_id: string }) {
     });
   }, [selected_ids, profile_to_merge_with, mutate]);
 
-  const totalLoaded = profiles.length;
+  const totalLoaded = useMemo(() => {
+    return profiles.length;
+  }, [profiles]);
 
   const resetDialog = useCallback(() => {
     setStep(0);
@@ -178,47 +178,12 @@ export function ProfileDialog({ event_id }: { event_id: string }) {
                   className="grid grid-cols-3 gap-2.5 sm:gap-3"
                 >
                   {profiles.map((page: Profile) => {
-                    const selected = selected_ids.has(page.id);
                     return (
-                      <Button
-                        key={page.id}
-                        type="button"
-                        variant="ghost"
-                        onClick={() => toggleProfile(page)}
-                        aria-pressed={selected}
-                        className={cn(
-                          "relative aspect-square h-auto w-full min-h-0 overflow-hidden rounded-xl border p-0 shadow-none transition-[box-shadow,transform,border-color] duration-200",
-                          "border-border/50 bg-muted/20 hover:bg-muted/35 hover:scale-[1.02] active:scale-[0.99]",
-                          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                          selected
-                            ? "border-primary/50 ring-2 ring-primary/35 ring-offset-2 ring-offset-background"
-                            : "hover:border-border",
-                        )}
-                      >
-                        <img
-                          src={page.photo_url}
-                          alt=""
-                          className="size-full object-cover transition-transform duration-200 group-hover/button:scale-[1.03]"
-                        />
-                        {selected ? (
-                          <>
-                            <span
-                              className="pointer-events-none absolute inset-0 bg-foreground/6"
-                              aria-hidden
-                            />
-                            <span
-                              className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm"
-                              aria-hidden
-                            >
-                              <Check
-                                className="size-3"
-                                strokeWidth={2.5}
-                                aria-hidden
-                              />
-                            </span>
-                          </>
-                        ) : null}
-                      </Button>
+                      <DialogProfilePreview
+                        page={page}
+                        selected={selected_ids.has(page.id)}
+                        toggle={toggleProfile}
+                      />
                     );
                   })}
                 </InfiniteScroll>
@@ -238,50 +203,12 @@ export function ProfileDialog({ event_id }: { event_id: string }) {
               <div className="rounded-lg border border-border/60 bg-muted/15 p-3">
                 <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
                   {profiles_to_merge.map((page: Profile) => {
-                    const isKeeper = profile_to_merge_with === page.id;
                     return (
-                      <Button
-                        key={page.id}
-                        type="button"
-                        variant="ghost"
-                        onClick={() => setProfileToMergeWith(page.id)}
-                        aria-pressed={isKeeper}
-                        className={cn(
-                          "relative aspect-square h-auto w-full min-h-0 overflow-hidden rounded-xl border p-0 shadow-none transition-[box-shadow,transform,border-color] duration-200",
-                          "border-border/50 bg-muted/20 hover:bg-muted/35 hover:scale-[1.02] active:scale-[0.99]",
-                          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                          isKeeper
-                            ? "border-primary/50 ring-2 ring-primary/35 ring-offset-2 ring-offset-background"
-                            : "hover:border-border",
-                        )}
-                      >
-                        <img
-                          src={page.photo_url}
-                          alt=""
-                          className="size-full object-cover transition-transform duration-200 group-hover/button:scale-[1.03]"
-                        />
-                        {isKeeper ? (
-                          <>
-                            <span
-                              className="pointer-events-none absolute inset-0 bg-foreground/6"
-                              aria-hidden
-                            />
-                            <span
-                              className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm"
-                              aria-hidden
-                            >
-                              <Check
-                                className="size-3"
-                                strokeWidth={2.5}
-                                aria-hidden
-                              />
-                            </span>
-                            <span className="pointer-events-none absolute bottom-1.5 left-1/2 max-w-[calc(100%-0.75rem)] -translate-x-1/2 truncate rounded-full bg-background/90 px-2 py-0.5 text-center text-[0.6rem] font-medium text-foreground shadow-sm ring-1 ring-border/50 backdrop-blur-sm">
-                              Keep
-                            </span>
-                          </>
-                        ) : null}
-                      </Button>
+                      <KeepProfile
+                        isKeeper={profile_to_merge_with === page.id}
+                        page={page}
+                        setKeeper={setProfileToMergeWith}
+                      />
                     );
                   })}
                 </div>

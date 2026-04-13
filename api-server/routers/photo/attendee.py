@@ -4,6 +4,7 @@ from typing import Annotated,cast
 from celery_app import match_photo
 from pydantic import UUID4
 from lib.database import supabase
+from lib.utils import check_event
 import asyncio
 
 attendee_photo_router = APIRouter(dependencies=[Depends(authMiddleware)])
@@ -25,17 +26,10 @@ async def match_selfie(photo:Annotated[UploadFile,File()],event_id:Annotated[str
     return {"message": result["message"], "photos": result["data"]}
 
 @attendee_photo_router.get("/profiles")
-async def get_profiles(event_id:Annotated[UUID4,Query()]):
-    event_db_res = supabase.table("events")\
-        .select("*")\
-            .eq("id",event_id)\
-                .execute()
-    event_data = cast(list[dict],event_db_res.data)   
+async def get_profiles(event_id:Annotated[str,Query()]):
+    event = check_event(event_id)
     
-    if not event_data :
-        raise HTTPException(status_code=404,detail=f"Event with id:{event_id} not found")
-    
-    event_name = event_data[0]["name"]         
+    event_name = event["name"]         
   
     profile_db_res = supabase.table("face_profiles")\
         .select("*")\

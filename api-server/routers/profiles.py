@@ -3,17 +3,13 @@ from lib.middleware import authMiddleware,organizerMiddleware
 from lib.database import supabase
 from typing import Annotated,cast
 from pydantic import BaseModel,UUID4
+from lib.utils import check_event
 
 profile_router=APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
 
 @profile_router.get("/")
 async def fetch_profiles(event_id:Annotated[str,Query()],page:Annotated[int,Query()],per_page:Annotated[int,Query()]):
-    event_db_res = supabase.table("events")\
-        .select("*")\
-            .eq("id",event_id)\
-                    .execute()
-    if not event_db_res.data:
-        raise HTTPException(status_code=404,detail=f"Event with {event_id} not found.") 
+    check_event(event_id)
               
     profile_db_res = supabase.table("face_profiles")\
         .select("representative_crop_path","id")\
@@ -74,13 +70,15 @@ class AssignProfileReq(BaseModel):
     profile_id: UUID4| None = None
     face_crop_id:UUID4
     
-@profile_router.post("/face-crop")
+@profile_router.post("/face-crops")
 async def assign_profile(request:Annotated[AssignProfileReq,Body()]):
+    #check if profile_id exists in the db
     if request.profile_id:
         profile_db_res = supabase.table("face_profiles").select("*").eq("id",request.profile_id).execute()
         if not profile_db_res.data:
             raise HTTPException(status_code=404,detail=f"Profile with id:{request.profile_id} not found") 
-        
+    
+    #check if the face_crop_id exists in the db  
     crops_db_res = supabase.table("face_crops")\
         .select("*")\
             .eq("id",request.face_crop_id)\
@@ -97,6 +95,7 @@ async def assign_profile(request:Annotated[AssignProfileReq,Body()]):
     
     profile_id = request.profile_id 
     
+    #if no profile_id was sent create a new profile 
     if request.profile_id is None:
         storage_image = supabase.storage.from_("inconclusive-crops").download(storage_path)
         supabase.storage.from_("face-crops").upload(
@@ -120,3 +119,29 @@ async def assign_profile(request:Annotated[AssignProfileReq,Body()]):
     supabase.table("face_crops").update({"processed":True}).eq("id",request.face_crop_id).execute()   
             
     return{"message":"Profile assigned successfully","data":{"profile_id":profile_id}}
+
+
+@profile_router.get("/inconclusives")
+async def fetch_inconclusive_profiles(event_id:Annotated[str,Query()],page:Annotated[int,Query()]=0,per_page:Annotated[int,Query()]=10):
+    check_event(event_id)
+    
+    db_res = supabase.table("face_crops")\
+        .select("*")\
+            .eq("event_id",event_id)\
+                .eq("processed",False)\
+                .range(page*per_page,(page+1)*per_page)\
+                .execute()
+                
+    face_crops = cast(list[dict],db_res.data)
+    
+    for crop in face_crops:
+        url = supabase.storage.from_("inconclusive-crops").get_public_url(crop["storage_path"])
+        crop["photo_url"] = url
+        
+    hasMore = False
+    
+    if len(face_crops)  > per_page :
+        hasMore = True
+        
+    return{"message":f"Inconclusive crops for event:{event_id} fetched successfully","data":face_crops,"hasMore":hasMore}                   
+        
