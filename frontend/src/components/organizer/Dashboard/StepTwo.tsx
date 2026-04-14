@@ -1,8 +1,8 @@
 import {
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "#/components/ui/dialog";
+  CommonDialogDescription,
+  CommonDialogHeader,
+  CommonDialogTitle,
+} from "#/components/CommonDialog";
 import { cn } from "#/lib/utils";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
@@ -34,15 +34,13 @@ export function StepTwo<T extends FieldValues & { photos: File[] }>({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
   return (
-    <>
-      <DialogHeader className="gap-1.5 text-left">
-        <DialogTitle className="display-title text-lg font-medium tracking-tight">
-          Add photos
-        </DialogTitle>
-        <DialogDescription>
+    <div className="p-4 space-y-2">
+      <CommonDialogHeader>
+        <CommonDialogTitle>Add photos</CommonDialogTitle>
+        <CommonDialogDescription>
           Drag in files or click to browse. You can add more than one.
-        </DialogDescription>
-      </DialogHeader>
+        </CommonDialogDescription>
+      </CommonDialogHeader>
       <div
         {...getRootProps()}
         className={cn(
@@ -63,6 +61,6 @@ export function StepTwo<T extends FieldValues & { photos: File[] }>({
           PNG, JPG, GIF, WebP — multiple files supported
         </p>
       </div>
-    </>
+    </div>
   );
 }

@@ -1,13 +1,6 @@
 import { InfiniteScrollLoader } from "#/components/Loaders/InfiniteScrollLoader";
 import { Button } from "#/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "#/components/ui/dialog";
+import { Dialog } from "#/components/ui/dialog";
 import {
   assignInconclusiveProfile,
   fetchEventProfiles,
@@ -18,13 +11,21 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { DialogProfilePreview } from "../DialogProfilesPreview";
 import type { Profile } from "#/lib/types/type";
 import { KeepProfile } from "../KeepProfile";
 import { toast } from "sonner";
+import {
+  CommonDialogContent,
+  CommonDialogFooter,
+  CommonDialogHeader,
+  CommonDialogTitle,
+  CommonDialogTrigger,
+  DialogStep,
+} from "#/components/CommonDialog";
+import { ScreenLoader } from "#/components/Loaders/ScreenLoader";
 
 export function AssignProfile({ event_id }: { event_id: string }) {
   const queryClient = useQueryClient();
@@ -127,33 +128,17 @@ export function AssignProfile({ event_id }: { event_id: string }) {
         if (!val) resetDialog();
       }}
     >
-      <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-auto shrink-0 px-1.5 text-xs font-medium text-muted-foreground underline-offset-4 hover:bg-transparent! hover:text-foreground hover:underline hover:cursor-pointer"
-        >
-          Assign profile
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-xl">
+      <CommonDialogTrigger>Assign profile</CommonDialogTrigger>
+      <CommonDialogContent>
         <div className="space-y-5 p-6 pb-4">
-          <DialogHeader className="gap-0 space-y-0 text-left">
-            <div className="border-b border-border/70 pb-4">
-              <p className="island-kicker">Step {step + 1} of 2</p>
-              <div className="mt-3 h-0.5 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-foreground/25 transition-[width] duration-300 ease-out"
-                  style={{ width: `${((step + 1) / 2) * 100}%` }}
-                />
-              </div>
-            </div>
-            <DialogTitle className="mt-4 text-base font-semibold tracking-tight text-(--sea-ink)">
+          <CommonDialogHeader>
+            <DialogStep step={step} totalSteps={2} />
+            <CommonDialogTitle>
               {step === 0
                 ? "Select an inconclusive crop"
                 : "Pick an existing profile"}
-            </DialogTitle>
-          </DialogHeader>
+            </CommonDialogTitle>
+          </CommonDialogHeader>
           {step === 0 && (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
@@ -165,18 +150,7 @@ export function AssignProfile({ event_id }: { event_id: string }) {
                 className="h-52 overflow-y-auto rounded-xl border bg-muted/10 p-2"
               >
                 {pendingInconclusive ? (
-                  <div
-                    className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground"
-                    role="status"
-                    aria-live="polite"
-                  >
-                    <Loader2
-                      className="size-4 shrink-0 animate-spin"
-                      strokeWidth={1.5}
-                      aria-hidden
-                    />
-                    Loading crops...
-                  </div>
+                  <ScreenLoader loadingText="Loading..." />
                 ) : (
                   <InfiniteScroll
                     hasMore={!!hasNextInconclusive}
@@ -229,7 +203,7 @@ export function AssignProfile({ event_id }: { event_id: string }) {
             </div>
           )}
         </div>
-        <DialogFooter className="m-0 rounded-none border-border/80 bg-muted/40 px-6 py-4 sm:rounded-b-xl sm:justify-between">
+        <CommonDialogFooter>
           {step === 0 && (
             <>
               <Button
@@ -270,8 +244,8 @@ export function AssignProfile({ event_id }: { event_id: string }) {
               </Button>
             </>
           )}
-        </DialogFooter>
-      </DialogContent>
+        </CommonDialogFooter>
+      </CommonDialogContent>
     </Dialog>
   );
 }

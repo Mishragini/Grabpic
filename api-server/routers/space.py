@@ -2,7 +2,7 @@ from fastapi import APIRouter,Depends,Request,Query,Body,HTTPException
 from pydantic import BaseModel
 from lib.middleware import authMiddleware,organizerMiddleware
 from lib.database import supabase
-from lib.utils  import generate_invite_code
+from lib.utils  import generate_invite_code,check_event
 from typing import cast,Annotated
 
 space_router = APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
@@ -50,3 +50,17 @@ async def fetch_spaces(request:Request,page:Annotated[int,Query()]=0,per_page:An
     space_data = cast(list[dict],space_db_res.data)        
                
     return {"message":"Events fetched successfully","data":space_data}
+
+
+@space_router.get("/{event_id}")
+async def fetch_space(event_id:str):
+    check_event(event_id)
+    
+    db_res = supabase.table("events")\
+        .select("id","invite_code","name")\
+            .eq("id",event_id)\
+                .execute()
+                
+    event = cast(dict,db_res.data[0])
+    
+    return {"message":f"Event with {event_id} fetched successfully!","data":event}            

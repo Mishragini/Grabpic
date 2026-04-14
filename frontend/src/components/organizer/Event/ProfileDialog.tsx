@@ -1,14 +1,6 @@
 import { InfiniteScrollLoader } from "#/components/Loaders/InfiniteScrollLoader";
 import { Button } from "#/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "#/components/ui/dialog";
+import { Dialog } from "#/components/ui/dialog";
 import { fetchEventProfiles, mergeProfiles } from "#/lib/api/profiles";
 import type { Profile } from "#/lib/types/type";
 import {
@@ -16,12 +8,22 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { toast } from "sonner";
 import { DialogProfilePreview } from "../DialogProfilesPreview";
 import { KeepProfile } from "../KeepProfile";
+import {
+  CommonDialogContent,
+  CommonDialogDescription,
+  CommonDialogFooter,
+  CommonDialogHeader,
+  CommonDialogTitle,
+  CommonDialogTrigger,
+  DialogStep,
+} from "#/components/CommonDialog";
+import { ScreenLoader } from "#/components/Loaders/ScreenLoader";
 
 export function ProfileDialog({ event_id }: { event_id: string }) {
   const queryClient = useQueryClient();
@@ -107,51 +109,20 @@ export function ProfileDialog({ event_id }: { event_id: string }) {
         resetDialog();
       }}
     >
-      <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-auto shrink-0 px-1.5 text-xs font-medium text-muted-foreground underline-offset-4 hover:bg-transparent! hover:text-foreground hover:underline hover:cursor-pointer"
-        >
-          Manage Duplicates
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
+      <CommonDialogTrigger>Manage Duplicates</CommonDialogTrigger>
+      <CommonDialogContent>
         <div className="space-y-5 p-6 pb-4">
-          <DialogHeader className="gap-0 space-y-0 text-left">
-            <div className="border-b border-border/70 pb-4">
-              <p className="island-kicker">Step {step + 1} of 2</p>
-              <div className="mt-3 h-0.5 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-foreground/25 transition-[width] duration-300 ease-out"
-                  style={{ width: `${((step + 1) / 2) * 100}%` }}
-                />
-              </div>
-            </div>
-            <DialogTitle className="mt-4 font-heading text-lg tracking-tight text-(--sea-ink)">
-              Merge face profiles
-            </DialogTitle>
-            <DialogDescription className="mt-1.5 text-pretty">
+          <CommonDialogHeader>
+            <DialogStep step={step} totalSteps={2} />
+            <CommonDialogTitle>Merge face profiles</CommonDialogTitle>
+            <CommonDialogDescription>
               {step === 0
                 ? "Select every face that belongs to the same person. You need at least two."
                 : "Tap one of the faces you selected — that profile stays; the others are merged into it."}
-            </DialogDescription>
-          </DialogHeader>
+            </CommonDialogDescription>
+          </CommonDialogHeader>
 
-          {isPending && (
-            <div
-              className="flex items-center gap-2 rounded-lg border border-dashed border-border/80 bg-muted/20 px-3 py-6 text-sm text-muted-foreground"
-              role="status"
-              aria-live="polite"
-            >
-              <Loader2
-                className="size-4 shrink-0 animate-spin"
-                strokeWidth={1.5}
-                aria-hidden
-              />
-              Loading profiles…
-            </div>
-          )}
+          {isPending && <ScreenLoader loadingText="Loading profiles" />}
 
           {data && !isPending && step === 0 && (
             <div className="space-y-2">
@@ -217,7 +188,7 @@ export function ProfileDialog({ event_id }: { event_id: string }) {
           )}
         </div>
 
-        <DialogFooter className="m-0 rounded-none border-border/80 bg-muted/40 px-6 py-4 sm:rounded-b-xl">
+        <CommonDialogFooter>
           {step === 1 ? (
             <>
               <Button
@@ -240,7 +211,7 @@ export function ProfileDialog({ event_id }: { event_id: string }) {
               >
                 {isMergePending ? (
                   <>
-                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                    <Loader2Icon className="size-4 animate-spin" aria-hidden />
                     Merging…
                   </>
                 ) : (
@@ -258,8 +229,8 @@ export function ProfileDialog({ event_id }: { event_id: string }) {
               Continue
             </Button>
           )}
-        </DialogFooter>
-      </DialogContent>
+        </CommonDialogFooter>
+      </CommonDialogContent>
     </Dialog>
   );
 }

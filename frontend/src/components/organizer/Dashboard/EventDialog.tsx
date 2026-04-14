@@ -1,12 +1,6 @@
 import { useForm, useWatch, type SubmitHandler } from "react-hook-form";
 import { Button } from "../../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogTrigger,
-} from "../../ui/dialog";
-import { cn } from "#/lib/utils";
+import { Dialog } from "../../ui/dialog";
 import { useCallback, useRef, useState } from "react";
 import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
@@ -18,6 +12,12 @@ import { StepThree } from "./StepThree";
 import { Thumbnails } from "./Thumbnails";
 import { createEvent } from "#/lib/api/event";
 import { StepFour } from "./StepFour";
+import {
+  ButtonDialogTrigger,
+  CommonDialogContent,
+  CommonDialogFooter,
+  DialogStep,
+} from "#/components/CommonDialog";
 
 const createEventSchema = z.object({
   name: z.string().min(3, "Event name should be at least 3 characters."),
@@ -91,39 +91,32 @@ export default function EventDialog() {
     },
     [name, photos],
   );
+
+  const resetDialog = useCallback(() => {
+    setStep(0);
+    setTaskId(null);
+    setCreatedEventId(null);
+    reset();
+  }, []);
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        asChild
-        onClick={() => {
-          setOpen(true);
-          setStep(0);
-          setTaskId(null);
-          setCreatedEventId(null);
-          reset();
-        }}
-      >
-        <Button className="cursor-pointer" size="lg">
-          Create Event
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
+    <Dialog
+      open={open}
+      onOpenChange={(val) => {
+        setOpen(val);
+        if (!val) {
+          resetDialog();
+        }
+      }}
+    >
+      <ButtonDialogTrigger>Create Event</ButtonDialogTrigger>
+      <CommonDialogContent>
         <form
           onSubmit={handleSubmit(handleCreateEvent)}
           className="flex flex-col"
         >
           <div className="space-y-6 p-6 pb-4">
-            <div className={cn(step < 3 && "border-b border-border/70 pb-4")}>
-              <p className="island-kicker">Step {step + 1} of 4</p>
-              {step < 3 && (
-                <div className="mt-3 h-0.5 w-full overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-foreground/25 transition-[width] duration-300 ease-out"
-                    style={{ width: `${((step + 1) / 3) * 100}%` }}
-                  />
-                </div>
-              )}
-            </div>
+            <DialogStep step={step} totalSteps={4} />
 
             <div className="space-y-6">
               {step === 0 && <StepOne register={register} errors={errors} />}
@@ -142,7 +135,7 @@ export default function EventDialog() {
             </div>
           </div>
 
-          <DialogFooter className="m-0 rounded-none border-border/80 bg-muted/40 px-6 py-4 sm:rounded-b-xl">
+          <CommonDialogFooter>
             {step > 0 && step < 3 && (
               <Button
                 type="button"
@@ -171,9 +164,9 @@ export default function EventDialog() {
                 Create Event
               </Button>
             )}
-          </DialogFooter>
+          </CommonDialogFooter>
         </form>
-      </DialogContent>
+      </CommonDialogContent>
     </Dialog>
   );
 }

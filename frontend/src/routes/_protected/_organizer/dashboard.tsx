@@ -1,10 +1,10 @@
 import { InfiniteScrollLoader } from "#/components/Loaders/InfiniteScrollLoader";
+import { ScreenLoader } from "#/components/Loaders/ScreenLoader";
 import { EventCard } from "#/components/organizer/Dashboard/EventCard";
 import EventDialog from "#/components/organizer/Dashboard/EventDialog";
 import { getSpaces } from "#/lib/api/space";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 export const Route = createFileRoute("/_protected/_organizer/dashboard")({
@@ -16,25 +16,12 @@ function RouteComponent() {
     queryKey: ["spaces"],
     queryFn: ({ pageParam }) => getSpaces(pageParam, 24),
     initialPageParam: 0,
-    getNextPageParam: (lastPage, pages, lastPageParam) =>
+    getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.length === 24 ? lastPageParam + 1 : undefined,
   });
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col items-center justify-center px-4">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2
-            className="size-7 animate-spin text-muted-foreground"
-            strokeWidth={1.5}
-            aria-hidden
-          />
-          <p className="text-xs font-medium tracking-wide text-muted-foreground">
-            Loading events
-          </p>
-        </div>
-      </div>
-    );
+    return <ScreenLoader loadingText="Loading Events" />;
   }
 
   if (data?.pages[0]?.length <= 0) {

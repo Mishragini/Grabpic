@@ -1,10 +1,5 @@
 import { Button } from "#/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogTrigger,
-} from "#/components/ui/dialog";
+import { Dialog, DialogFooter } from "#/components/ui/dialog";
 import { useForm, useWatch } from "react-hook-form";
 import { StepTwo } from "./StepTwo";
 import * as z from "zod";
@@ -12,8 +7,13 @@ import { useMutation } from "@tanstack/react-query";
 import { uploadPhotos } from "#/lib/api/photos";
 import { toast } from "sonner";
 import { StepFour } from "./StepFour";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Thumbnails } from "./Thumbnails";
+import {
+  ButtonDialogTrigger,
+  CommonDialogContent,
+  CommonDialogFooter,
+} from "#/components/CommonDialog";
 
 const uploadPhotoSchema = z.object({
   photos: z.array(z.instanceof(File)),
@@ -56,23 +56,24 @@ export function UploadPhotoDilaog({ event_id }: { event_id: string }) {
   const handleUpload = () => {
     mutate({ photos, event_id });
   };
+  const resetDialog = useCallback(() => {
+    setStep(0);
+    setTaskId("");
+    reset();
+  }, []);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        asChild
-        onClick={() => {
-          setOpen(true);
-          setStep(0);
-          setTaskId("");
-          reset();
-        }}
-      >
-        <Button className="flex h-9 w-full items-center rounded-lg border border-dashed border-(--line) bg-muted/30 px-3 text-xs text-muted-foreground">
-          Upload photos to the event
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="overflow-hidden sm:max-w-lg">
+    <Dialog
+      open={open}
+      onOpenChange={(val) => {
+        setOpen(val);
+        if (!val) resetDialog();
+      }}
+    >
+      <ButtonDialogTrigger className="flex h-9 items-center rounded-lg border border-dashed border-(--line) bg-muted/30 px-3 text-xs text-muted-foreground">
+        Upload photos to the event
+      </ButtonDialogTrigger>
+      <CommonDialogContent>
         {step === 0 ? (
           <form onSubmit={handleSubmit(handleUpload)} className="space-y-4">
             <StepTwo photos={photos} setValue={setValue} />
@@ -84,11 +85,11 @@ export function UploadPhotoDilaog({ event_id }: { event_id: string }) {
             {photos.length > 0 && (
               <Thumbnails photos={photos} setValue={setValue} />
             )}
-            <DialogFooter>
+            <CommonDialogFooter>
               <Button type="submit" disabled={photos.length <= 0 || isPending}>
                 Upload
               </Button>
-            </DialogFooter>
+            </CommonDialogFooter>
           </form>
         ) : (
           <div className="space-y-4">
@@ -99,7 +100,7 @@ export function UploadPhotoDilaog({ event_id }: { event_id: string }) {
             />
           </div>
         )}
-      </DialogContent>
+      </CommonDialogContent>
     </Dialog>
   );
 }

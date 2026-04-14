@@ -39,7 +39,6 @@ export const fetchInconclusiveProfiles = async (event_id: string, page: number =
                 per_page
             }
         })
-        console.log("api_response ....", api_response.data)
 
         return { data: api_response.data.data, hasMore: api_response.data.hasMore }
     } catch (error) {

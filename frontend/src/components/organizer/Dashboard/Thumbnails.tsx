@@ -53,7 +53,7 @@ export function Thumbnails<T extends FieldValues & { photos: File[] }>({
     [photos, setValue],
   );
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 p-4">
       <p className="island-kicker">Selected</p>
       <div className="max-h-40 overflow-y-auto rounded-xl border border-border/80 bg-muted/15 p-3">
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">

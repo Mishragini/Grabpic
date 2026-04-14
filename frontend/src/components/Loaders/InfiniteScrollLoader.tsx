@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 
 export function InfiniteScrollLoader() {
   return (
@@ -7,7 +7,7 @@ export function InfiniteScrollLoader() {
       role="status"
       aria-live="polite"
     >
-      <Loader2
+      <Loader2Icon
         className="size-5 animate-spin text-muted-foreground"
         strokeWidth={1.5}
         aria-hidden

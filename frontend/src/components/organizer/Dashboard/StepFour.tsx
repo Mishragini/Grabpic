@@ -1,12 +1,12 @@
-import {
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "#/components/ui/dialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { TriangleAlertIcon } from "lucide-react";
 import { toast } from "sonner";
+import {
+  CommonDialogDescription,
+  CommonDialogHeader,
+  CommonDialogTitle,
+} from "#/components/CommonDialog";
 
 export function StepFour({
   task_id,
@@ -59,17 +59,15 @@ export function StepFour({
     });
   }, [completed, event_id, queryClient]);
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4">
       {error ? (
         <>
-          <DialogHeader className="gap-1.5 text-left">
-            <DialogTitle className="display-title text-lg font-medium tracking-tight">
-              Processing failed
-            </DialogTitle>
-            <DialogDescription>
+          <CommonDialogHeader>
+            <CommonDialogTitle>Processing failed</CommonDialogTitle>
+            <CommonDialogDescription>
               We couldn&apos;t finish processing your photos.
-            </DialogDescription>
-          </DialogHeader>
+            </CommonDialogDescription>
+          </CommonDialogHeader>
           <div
             className="island-shell rise-in flex gap-3 rounded-xl p-4 ring-1 ring-destructive/20"
             role="alert"
@@ -92,22 +90,24 @@ export function StepFour({
           </div>
         </>
       ) : completed ? (
-        <DialogHeader className="gap-1.5 text-left">
-          <DialogTitle className="display-title text-lg font-medium tracking-tight">
+        <CommonDialogHeader className="gap-1.5 text-left">
+          <CommonDialogTitle className="display-title text-lg font-medium tracking-tight">
             All set
-          </DialogTitle>
-          <DialogDescription>Processing complete.</DialogDescription>
-        </DialogHeader>
+          </CommonDialogTitle>
+          <CommonDialogDescription>
+            Processing complete.
+          </CommonDialogDescription>
+        </CommonDialogHeader>
       ) : (
         <>
-          <DialogHeader className="gap-1.5 text-left">
-            <DialogTitle className="display-title text-lg font-medium tracking-tight">
+          <CommonDialogHeader>
+            <CommonDialogTitle className="display-title text-lg font-medium tracking-tight">
               Processing
-            </DialogTitle>
-            <DialogDescription>
+            </CommonDialogTitle>
+            <CommonDialogDescription>
               This can take a moment for large uploads.
-            </DialogDescription>
-          </DialogHeader>
+            </CommonDialogDescription>
+          </CommonDialogHeader>
           <div className="island-shell space-y-3 rounded-xl p-4">
             <div className="flex items-baseline justify-between gap-3 text-sm">
               <span className="text-muted-foreground">Progress</span>

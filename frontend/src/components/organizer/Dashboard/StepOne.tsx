@@ -1,8 +1,8 @@
 import {
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "#/components/ui/dialog";
+  CommonDialogDescription,
+  CommonDialogHeader,
+  CommonDialogTitle,
+} from "#/components/CommonDialog";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
@@ -20,14 +20,12 @@ interface StepOneProps {
 export function StepOne({ register, errors }: StepOneProps) {
   return (
     <>
-      <DialogHeader className="gap-1.5 text-left">
-        <DialogTitle className="display-title text-lg font-medium tracking-tight">
-          New event
-        </DialogTitle>
-        <DialogDescription>
+      <CommonDialogHeader>
+        <CommonDialogTitle>New event</CommonDialogTitle>
+        <CommonDialogDescription>
           Choose a name guests will recognize.
-        </DialogDescription>
-      </DialogHeader>
+        </CommonDialogDescription>
+      </CommonDialogHeader>
       <div className="space-y-2">
         <Label className="text-foreground" htmlFor="event-name">
           Event name

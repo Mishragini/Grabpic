@@ -5,8 +5,13 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 
 import { Profiles } from "../Profiles";
+import { ShareEventDialog } from "../ShareEventDialog";
 
-export function EventCard({ event }: { event: { name: string; id: string } }) {
+export function EventCard({
+  event,
+}: {
+  event: { name: string; id: string; invite_code: string };
+}) {
   return (
     <Card
       className={cn(
@@ -16,13 +21,18 @@ export function EventCard({ event }: { event: { name: string; id: string } }) {
     >
       <>
         <CardHeader className="gap-1 space-y-0 pb-2 pt-5">
-          <p className="island-kicker">Event</p>
-          <h3
-            className="display-title line-clamp-2 text-lg font-semibold leading-snug tracking-tight text-(--sea-ink)"
-            title={event.name}
-          >
-            {event.name}
-          </h3>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="island-kicker">Event</p>
+              <h3
+                className="display-title line-clamp-2 text-lg font-semibold leading-snug tracking-tight text-(--sea-ink)"
+                title={event.name}
+              >
+                {event.name}
+              </h3>
+            </div>
+            <ShareEventDialog event={event} />
+          </div>
         </CardHeader>
         <CardContent className="flex flex-1 flex-col gap-4 pb-5 pt-0">
           <Profiles event_id={event.id} per_page={5} />

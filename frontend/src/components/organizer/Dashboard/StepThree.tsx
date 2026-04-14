@@ -1,8 +1,8 @@
 import {
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "#/components/ui/dialog";
+  CommonDialogDescription,
+  CommonDialogHeader,
+  CommonDialogTitle,
+} from "#/components/CommonDialog";
 
 interface StepThreeProps {
   event_name: string;
@@ -12,14 +12,12 @@ interface StepThreeProps {
 export function StepThree({ event_name, photos }: StepThreeProps) {
   return (
     <>
-      <DialogHeader className="gap-1.5 text-left">
-        <DialogTitle className="display-title text-lg font-medium tracking-tight">
-          Review
-        </DialogTitle>
-        <DialogDescription>
+      <CommonDialogHeader>
+        <CommonDialogTitle>Review</CommonDialogTitle>
+        <CommonDialogDescription>
           Confirm details before creating the event.
-        </DialogDescription>
-      </DialogHeader>
+        </CommonDialogDescription>
+      </CommonDialogHeader>
       <div className="island-shell space-y-4 rounded-xl p-4">
         <div className="space-y-1">
           <p className="island-kicker text-[0.65rem]">Event</p>

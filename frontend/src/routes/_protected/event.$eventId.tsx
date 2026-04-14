@@ -1,8 +1,12 @@
+import { ScreenLoader } from "#/components/Loaders/ScreenLoader";
 import { AssignProfile } from "#/components/organizer/Event/AssignProfileDialog";
 import { Gallery } from "#/components/organizer/Event/Gallery";
 import { InconclusiveProfile } from "#/components/organizer/Event/InconclusiveProfile";
 import { ProfileDialog } from "#/components/organizer/Event/ProfileDialog";
 import { Profiles } from "#/components/organizer/Profiles";
+import { ShareEventDialog } from "#/components/organizer/ShareEventDialog";
+import { getSpaceById } from "#/lib/api/space";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_protected/event/$eventId")({
@@ -12,16 +16,33 @@ export const Route = createFileRoute("/_protected/event/$eventId")({
 function RouteComponent() {
   const { eventId: event_id } = Route.useParams();
 
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["space", event_id],
+    queryFn: async () => {
+      const data = await getSpaceById(event_id);
+      return data;
+    },
+  });
+
+  if (isPending) {
+    return <ScreenLoader loadingText="Loading the event details" />;
+  }
+
   return (
     <div className="page-wrap py-10 sm:py-12">
       <header className="rise-in border-b border-border/70 pb-5">
-        <p className="island-kicker">Event Workspace</p>
-        <h1 className="display-title mt-2 text-2xl font-semibold tracking-tight text-(--sea-ink) sm:text-3xl">
-          Event Profiles
-        </h1>
-        <p className="mt-2 font-mono text-xs text-muted-foreground">
-          {event_id}
-        </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="display-title mt-2 text-2xl font-semibold tracking-tight text-(--sea-ink) sm:text-3xl">
+              {data.name}
+            </h1>
+            <p className="mt-2 font-mono text-xs text-muted-foreground">
+              {event_id}
+            </p>
+          </div>
+
+          <ShareEventDialog event={data} />
+        </div>
       </header>
 
       <div className="mt-7 grid gap-8">
