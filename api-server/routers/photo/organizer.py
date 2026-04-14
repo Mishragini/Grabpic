@@ -10,7 +10,7 @@ organizer_photo_router = APIRouter(dependencies=[Depends(authMiddleware),Depends
 
 @organizer_photo_router.post("/upload")
 async def upload(req:Request,photos:Annotated[list[UploadFile],File()],event_id:Annotated[str,Form()]):
-    check_event(event_id,req.state.user.id)
+    check_event(event_id,req.state.user["id"])
          
     photo_contents=[]
     
@@ -31,7 +31,7 @@ async def upload(req:Request,photos:Annotated[list[UploadFile],File()],event_id:
 
 @organizer_photo_router.get("/face-crops")
 async def fetch_inconclusive_face_crops(req:Request,event_id:Annotated[str,Query()]):
-    check_event(event_id,req.state.user.id)
+    check_event(event_id,req.state.user["id"])
     db_res = supabase.table("face_crops")\
         .select("*")\
             .eq("event_id",event_id)\
@@ -42,7 +42,7 @@ async def fetch_inconclusive_face_crops(req:Request,event_id:Annotated[str,Query
     
 @organizer_photo_router.get("/")
 async def fetch_event_photos(req:Request,event_id:Annotated[str,Query()],page:Annotated[int,Query()]=0,per_page:Annotated[int,Query()]=10):
-    check_event(event_id,req.state.user.id)
+    check_event(event_id,req.state.user["id"])
     
     photos_db_res = supabase.table("photos")\
         .select("*")\

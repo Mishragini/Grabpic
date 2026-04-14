@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "#/redux/hooks";
 import { Button } from "./ui/button";
 import { useNavigate } from "@tanstack/react-router";
 import { logout } from "#/lib/api/auth";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { clearUser, selectUser } from "#/redux/userSlice";
 
@@ -11,6 +11,7 @@ export default function Header() {
   const user = useAppSelector(selectUser);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { isPending, mutate } = useMutation({
     mutationFn: logout,
     onError: (error) => {
@@ -19,6 +20,7 @@ export default function Header() {
     onSuccess: () => {
       toast.success("Logged out successfully");
       dispatch(clearUser());
+      queryClient.clear();
       navigate({ to: "/login" });
     },
   });

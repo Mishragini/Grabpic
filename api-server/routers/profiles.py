@@ -9,7 +9,7 @@ profile_router=APIRouter(dependencies=[Depends(authMiddleware),Depends(organizer
 
 @profile_router.get("/")
 async def fetch_profiles(req:Request,event_id:Annotated[str,Query()],page:Annotated[int,Query()],per_page:Annotated[int,Query()]):
-    check_event(event_id,req.state.user.id)
+    check_event(event_id,req.state.user["id"])
               
     profile_db_res = supabase.table("face_profiles")\
         .select("representative_crop_path","id")\
@@ -123,7 +123,7 @@ async def assign_profile(request:Annotated[AssignProfileReq,Body()]):
 
 @profile_router.get("/inconclusives")
 async def fetch_inconclusive_profiles(req:Request,event_id:Annotated[str,Query()],page:Annotated[int,Query()]=0,per_page:Annotated[int,Query()]=10):
-    check_event(event_id,req.state.user.id)
+    check_event(event_id,req.state.user["id"])
     
     db_res = supabase.table("face_crops")\
         .select("*")\

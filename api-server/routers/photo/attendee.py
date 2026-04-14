@@ -27,7 +27,7 @@ async def match_selfie(photo:Annotated[UploadFile,File()],event_id:Annotated[str
 
 @attendee_photo_router.get("/profiles")
 async def get_profiles(req:Request,event_id:Annotated[str,Query()]):
-    event = check_event(event_id,req.state.user.id)
+    event = check_event(event_id,req.state.user["id"])
     
     event_name = event["name"]         
   
