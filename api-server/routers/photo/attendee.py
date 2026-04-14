@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends,File,UploadFile,HTTPException,Query,Form
+from fastapi import APIRouter,Depends,File,UploadFile,HTTPException,Query,Form,Request
 from lib.middleware import authMiddleware
 from typing import Annotated,cast
 from celery_app import match_photo
@@ -26,8 +26,8 @@ async def match_selfie(photo:Annotated[UploadFile,File()],event_id:Annotated[str
     return {"message": result["message"], "photos": result["data"]}
 
 @attendee_photo_router.get("/profiles")
-async def get_profiles(event_id:Annotated[str,Query()]):
-    event = check_event(event_id)
+async def get_profiles(req:Request,event_id:Annotated[str,Query()]):
+    event = check_event(event_id,req.state.user.id)
     
     event_name = event["name"]         
   

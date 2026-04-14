@@ -53,8 +53,8 @@ async def fetch_spaces(request:Request,page:Annotated[int,Query()]=0,per_page:An
 
 
 @space_router.get("/{event_id}")
-async def fetch_space(event_id:str):
-    check_event(event_id)
+async def fetch_space(req:Request,event_id:str):
+    check_event(event_id,req.state.user.id)
     
     db_res = supabase.table("events")\
         .select("id","invite_code","name")\

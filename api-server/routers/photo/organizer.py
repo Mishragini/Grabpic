@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends,File,UploadFile,HTTPException,Form,Query
+from fastapi import APIRouter,Depends,File,UploadFile,HTTPException,Form,Query,Request
 from lib.middleware import authMiddleware,organizerMiddleware
 from lib.database import supabase
 from typing import Annotated,cast
@@ -9,11 +9,12 @@ import base64
 organizer_photo_router = APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
 
 @organizer_photo_router.post("/upload")
-async def upload(photos:Annotated[list[UploadFile],File()],event_id:Annotated[str,Form()]):
-    #check if the files sent are image
-    check_event(event_id)
+async def upload(req:Request,photos:Annotated[list[UploadFile],File()],event_id:Annotated[str,Form()]):
+    check_event(event_id,req.state.user.id)
          
     photo_contents=[]
+    
+    #check if the files sent are image
     for photo in photos:
         contents = await photo.read()
         if not is_image(contents):
@@ -29,8 +30,8 @@ async def upload(photos:Annotated[list[UploadFile],File()],event_id:Annotated[st
     return {"message":"Processing Photo","task_id":task.id}
 
 @organizer_photo_router.get("/face-crops")
-async def fetch_inconclusive_face_crops(event_id:Annotated[str,Query()]):
-    check_event(event_id)
+async def fetch_inconclusive_face_crops(req:Request,event_id:Annotated[str,Query()]):
+    check_event(event_id,req.state.user.id)
     db_res = supabase.table("face_crops")\
         .select("*")\
             .eq("event_id",event_id)\
@@ -40,8 +41,8 @@ async def fetch_inconclusive_face_crops(event_id:Annotated[str,Query()]):
     return {"message":"Crops fetched successfully!","data":face_crops}
     
 @organizer_photo_router.get("/")
-async def fetch_event_photos(event_id:Annotated[str,Query()],page:Annotated[int,Query()]=0,per_page:Annotated[int,Query()]=10):
-    check_event(event_id)
+async def fetch_event_photos(req:Request,event_id:Annotated[str,Query()],page:Annotated[int,Query()]=0,per_page:Annotated[int,Query()]=10):
+    check_event(event_id,req.state.user.id)
     
     photos_db_res = supabase.table("photos")\
         .select("*")\
