@@ -5,7 +5,7 @@ import {
   assignInconclusiveProfile,
   fetchEventProfiles,
   fetchInconclusiveProfiles,
-} from "#/lib/api/profiles";
+} from "#/lib/api/organizer/profiles";
 import {
   useInfiniteQuery,
   useMutation,

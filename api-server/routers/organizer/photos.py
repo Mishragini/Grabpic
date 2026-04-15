@@ -54,7 +54,7 @@ async def fetch_event_photos(req:Request,event_id:Annotated[str,Query()],page:An
     
     for photo in photos:
         url = supabase.storage.from_("photos").get_public_url(photo["storage_path"])
-        photo["image_url"] = url
+        photo["photo_url"] = url
         
     hasMore = False    
         

@@ -11,8 +11,8 @@ function App() {
   useEffect(() => {
     if (user) {
       user.role === "organizer"
-        ? navigate({ to: "/dashboard" })
-        : navigate({ to: "/selfie" });
+        ? navigate({ to: "/organizer/dashboard" })
+        : navigate({ to: "/attendee/invite" });
     }
   }, [user]);
 }

@@ -2,12 +2,12 @@ import { InfiniteScrollLoader } from "#/components/Loaders/InfiniteScrollLoader"
 import { ScreenLoader } from "#/components/Loaders/ScreenLoader";
 import { EventCard } from "#/components/organizer/Dashboard/EventCard";
 import EventDialog from "#/components/organizer/Dashboard/EventDialog";
-import { getSpaces } from "#/lib/api/space";
+import { getSpaces } from "#/lib/api/organizer/space";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import InfiniteScroll from "react-infinite-scroll-component";
 
-export const Route = createFileRoute("/_protected/_organizer/dashboard")({
+export const Route = createFileRoute("/_protected/organizer/dashboard")({
   component: RouteComponent,
 });
 
@@ -45,7 +45,7 @@ function RouteComponent() {
       >
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 overflow-y-auto">
           {data?.pages.flat().map((event) => (
-            <EventCard key={event.id} event={event} />
+            <EventCard key={event?.id} event={event} />
           ))}
         </div>
       </InfiniteScroll>

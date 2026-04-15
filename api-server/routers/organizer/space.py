@@ -5,13 +5,13 @@ from lib.database import supabase
 from lib.utils  import generate_invite_code,check_event
 from typing import cast,Annotated
 
-space_router = APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
+organizer_space_router = APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
 
 class CreateSpaceRequest(BaseModel):
     name:str
            
 
-@space_router.post("/")
+@organizer_space_router.post("/")
 async def create_space(request:Request,space:Annotated[CreateSpaceRequest,Body()]):
     user = request.state.user
     
@@ -37,7 +37,7 @@ async def create_space(request:Request,space:Annotated[CreateSpaceRequest,Body()
     
     return{"message":"Event created successfully","data":event_data}
 
-@space_router.get("/")
+@organizer_space_router.get("/")
 async def fetch_spaces(request:Request,page:Annotated[int,Query()]=0,per_page:Annotated[int,Query()]=5):
     user = request.state.user
     
@@ -52,7 +52,7 @@ async def fetch_spaces(request:Request,page:Annotated[int,Query()]=0,per_page:An
     return {"message":"Events fetched successfully","data":space_data}
 
 
-@space_router.get("/{event_id}")
+@organizer_space_router.get("/{event_id}")
 async def fetch_space(req:Request,event_id:str):
     check_event(event_id,req.state.user["id"])
     

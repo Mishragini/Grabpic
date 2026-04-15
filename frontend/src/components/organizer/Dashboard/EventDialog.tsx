@@ -10,7 +10,7 @@ import { StepOne } from "./StepOne";
 import { StepTwo } from "./StepTwo";
 import { StepThree } from "./StepThree";
 import { Thumbnails } from "./Thumbnails";
-import { createEvent } from "#/lib/api/event";
+import { createEvent } from "#/lib/api/organizer/event";
 import { StepFour } from "./StepFour";
 import {
   ButtonDialogTrigger,

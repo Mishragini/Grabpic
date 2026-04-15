@@ -26,16 +26,16 @@ export function EventCard({
               <p className="island-kicker">Event</p>
               <h3
                 className="display-title line-clamp-2 text-lg font-semibold leading-snug tracking-tight text-(--sea-ink)"
-                title={event.name}
+                title={event?.name}
               >
-                {event.name}
+                {event?.name}
               </h3>
             </div>
             <ShareEventDialog event={event} />
           </div>
         </CardHeader>
         <CardContent className="flex flex-1 flex-col gap-4 pb-5 pt-0">
-          <Profiles event_id={event.id} per_page={5} />
+          <Profiles event_id={event?.id} per_page={5} />
           <div className="mt-auto">
             <Button
               variant="ghost"
@@ -43,7 +43,10 @@ export function EventCard({
               className="gap-1.5 flex w-full justify-end hover:bg-transparent! hover:text-muted-foreground! dark:hover:bg-transparent!"
               asChild
             >
-              <Link to="/event/$eventId" params={{ eventId: event.id }}>
+              <Link
+                to="/organizer/event/$eventId"
+                params={{ eventId: event?.id }}
+              >
                 View event
                 <ArrowRight className="size-3.5 opacity-70 transition-transform group-hover/button:translate-x-0.5" />
               </Link>

@@ -5,9 +5,9 @@ from typing import Annotated,cast
 from pydantic import BaseModel,UUID4
 from lib.utils import check_event
 
-profile_router=APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
+organizer_profile_router=APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
 
-@profile_router.get("/")
+@organizer_profile_router.get("/")
 async def fetch_profiles(req:Request,event_id:Annotated[str,Query()],page:Annotated[int,Query()],per_page:Annotated[int,Query()]):
     check_event(event_id,req.state.user["id"])
               
@@ -36,7 +36,7 @@ class RemoveDuplicateProfileReq(BaseModel):
     profile_id:str
     duplicate_profile_ids:list[str]
     
-@profile_router.post("/duplicates/remove")
+@organizer_profile_router.post("/duplicates/remove")
 async def remove_duplicate_profile(request: Annotated[RemoveDuplicateProfileReq, Body()]):
     # fetch all duplicate profiles
     profile_db_res = supabase.table("face_profiles")\
@@ -70,7 +70,7 @@ class AssignProfileReq(BaseModel):
     profile_id: UUID4| None = None
     face_crop_id:UUID4
     
-@profile_router.post("/face-crops")
+@organizer_profile_router.post("/face-crops")
 async def assign_profile(request:Annotated[AssignProfileReq,Body()]):
     #check if profile_id exists in the db
     if request.profile_id:
@@ -121,7 +121,7 @@ async def assign_profile(request:Annotated[AssignProfileReq,Body()]):
     return{"message":"Profile assigned successfully","data":{"profile_id":profile_id}}
 
 
-@profile_router.get("/inconclusives")
+@organizer_profile_router.get("/inconclusives")
 async def fetch_inconclusive_profiles(req:Request,event_id:Annotated[str,Query()],page:Annotated[int,Query()]=0,per_page:Annotated[int,Query()]=10):
     check_event(event_id,req.state.user["id"])
     

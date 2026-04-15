@@ -25,4 +25,17 @@ def check_event(event_id:str,user_id:str):
     if not event:
         raise HTTPException(status_code=404,detail=f"Event with {event_id} not found")
     
-    return event           
+    return event 
+
+def check_event_attendee(event_id:str):
+    event_db_res = supabase.table("events")\
+        .select("*")\
+            .eq("id",event_id)\
+            .execute()   
+            
+    event = cast(dict,event_db_res.data[0])
+    
+    if not event:
+        raise HTTPException(status_code=404,detail=f"Event not found")
+    
+    return event                

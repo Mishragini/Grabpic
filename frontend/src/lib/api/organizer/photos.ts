@@ -1,5 +1,5 @@
 import { AxiosError } from "axios"
-import api from "./apiCall"
+import api from "../apiCall"
 
 export const uploadPhotos = async (photos: File[], event_id: string) => {
     try {

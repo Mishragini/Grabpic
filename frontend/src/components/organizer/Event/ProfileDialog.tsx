@@ -1,7 +1,10 @@
 import { InfiniteScrollLoader } from "#/components/Loaders/InfiniteScrollLoader";
 import { Button } from "#/components/ui/button";
 import { Dialog } from "#/components/ui/dialog";
-import { fetchEventProfiles, mergeProfiles } from "#/lib/api/profiles";
+import {
+  fetchEventProfiles,
+  mergeProfiles,
+} from "#/lib/api/organizer/profiles";
 import type { Profile } from "#/lib/types/type";
 import {
   useInfiniteQuery,

@@ -6,7 +6,18 @@ interface Profile {
 
 interface Photo {
     id: string,
-    image_url: string
+    photo_url: string
 }
 
-export type { Profile, Photo }
+export enum Role {
+    organizer = "organizer",
+    attendee = "attendee"
+}
+
+interface Event {
+    id: string;
+    invite_code: string;
+    name: string;
+}
+
+export type { Profile, Photo, Event }

@@ -4,7 +4,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { StepTwo } from "./StepTwo";
 import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { uploadPhotos } from "#/lib/api/photos";
+import { uploadPhotos } from "#/lib/api/organizer/photos";
 import { toast } from "sonner";
 import { StepFour } from "./StepFour";
 import { useCallback, useState } from "react";

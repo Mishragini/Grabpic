@@ -1,4 +1,4 @@
-import { fetchEventProfiles } from "#/lib/api/profiles";
+import { fetchEventProfiles } from "#/lib/api/organizer/profiles";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";

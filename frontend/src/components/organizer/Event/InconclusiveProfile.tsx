@@ -1,5 +1,5 @@
 import { ProfileLoader } from "#/components/Loaders/ProfileLoader";
-import { fetchInconclusiveProfiles } from "#/lib/api/profiles";
+import { fetchInconclusiveProfiles } from "#/lib/api/organizer/profiles";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { DisplayProfile } from "../ProfileDisplay";

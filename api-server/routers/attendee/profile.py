@@ -1,15 +1,14 @@
-from fastapi import APIRouter,Depends,File,UploadFile,HTTPException,Query,Form,Request
-from lib.middleware import authMiddleware
+from fastapi import APIRouter,UploadFile,File,Form,HTTPException,Request,Query,Depends
 from typing import Annotated,cast
 from celery_app import match_photo
-from pydantic import UUID4
+from lib.utils import check_event_attendee
 from lib.database import supabase
-from lib.utils import check_event
+from lib.middleware import authMiddleware
 import asyncio
 
-attendee_photo_router = APIRouter(dependencies=[Depends(authMiddleware)])
+attendee_profile_router = APIRouter(dependencies=[Depends(authMiddleware)])
 
-@attendee_photo_router.post("/match-selfie")
+@attendee_profile_router.post("/match-selfie")
 async def match_selfie(photo:Annotated[UploadFile,File()],event_id:Annotated[str,Form()]):
     image_bytes = await photo.read()
     task = match_photo.delay(image_bytes,event_id)
@@ -23,17 +22,18 @@ async def match_selfie(photo:Annotated[UploadFile,File()],event_id:Annotated[str
     if not isinstance(result,dict):
          raise HTTPException(status_code=500, detail="Unexpected result from task")
      
-    return {"message": result["message"], "photos": result["data"]}
+    return {"message": result["message"], "data": result["data"]}
 
-@attendee_photo_router.get("/profiles")
-async def get_profiles(req:Request,event_id:Annotated[str,Query()]):
-    event = check_event(event_id,req.state.user["id"])
+#why would the attendee need the profiles -> maybe his selfie didnt match
+@attendee_profile_router.get("/")
+async def get_profiles(req:Request,invite_code:Annotated[str,Query()]):
+    event = check_event_attendee(invite_code)
     
     event_name = event["name"]         
   
     profile_db_res = supabase.table("face_profiles")\
         .select("*")\
-            .eq("event_id",event_id)\
+            .eq("event_id",event["id"])\
                 .execute()
     
     profile_data = cast(list[dict],profile_db_res.data)  
@@ -42,4 +42,3 @@ async def get_profiles(req:Request,event_id:Annotated[str,Query()]):
         raise HTTPException(status_code=404,detail=f"No profiles found for event:{event_name}")
     
     return {"message":"Profiles fetched successfully","data":profile_data}                
-            

@@ -1,10 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "./store";
+import type { Role } from "#/lib/types/type";
 
-enum Role {
-    organizer = "organizer",
-    attendee = "attendee"
-}
 interface UserValue {
     user_id: string
     role: Role,

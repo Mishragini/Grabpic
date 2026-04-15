@@ -13,9 +13,11 @@ import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as ProtectedIndexRouteImport } from './routes/_protected/index'
 import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
-import { Route as ProtectedEventEventIdRouteImport } from './routes/_protected/event.$eventId'
-import { Route as ProtectedOrganizerDashboardRouteImport } from './routes/_protected/_organizer/dashboard'
-import { Route as ProtectedAttendeeSelfieRouteImport } from './routes/_protected/_attendee/selfie'
+import { Route as ProtectedOrganizerDashboardRouteImport } from './routes/_protected/organizer/dashboard'
+import { Route as ProtectedAttendeeSelfieRouteImport } from './routes/_protected/attendee/selfie'
+import { Route as ProtectedAttendeeInviteRouteImport } from './routes/_protected/attendee/invite'
+import { Route as ProtectedOrganizerEventEventIdRouteImport } from './routes/_protected/organizer/event.$eventId'
+import { Route as ProtectedAttendeeEventEventIdProfileIdRouteImport } from './routes/_protected/attendee/event.$eventId.$profileId'
 
 const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
@@ -36,38 +38,54 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProtectedEventEventIdRoute = ProtectedEventEventIdRouteImport.update({
-  id: '/event/$eventId',
-  path: '/event/$eventId',
-  getParentRoute: () => ProtectedRoute,
-} as any)
 const ProtectedOrganizerDashboardRoute =
   ProtectedOrganizerDashboardRouteImport.update({
-    id: '/_organizer/dashboard',
-    path: '/dashboard',
+    id: '/organizer/dashboard',
+    path: '/organizer/dashboard',
     getParentRoute: () => ProtectedRoute,
   } as any)
 const ProtectedAttendeeSelfieRoute = ProtectedAttendeeSelfieRouteImport.update({
-  id: '/_attendee/selfie',
-  path: '/selfie',
+  id: '/attendee/selfie',
+  path: '/attendee/selfie',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedAttendeeInviteRoute = ProtectedAttendeeInviteRouteImport.update({
+  id: '/attendee/invite',
+  path: '/attendee/invite',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedOrganizerEventEventIdRoute =
+  ProtectedOrganizerEventEventIdRouteImport.update({
+    id: '/organizer/event/$eventId',
+    path: '/organizer/event/$eventId',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
+const ProtectedAttendeeEventEventIdProfileIdRoute =
+  ProtectedAttendeeEventEventIdProfileIdRouteImport.update({
+    id: '/attendee/event/$eventId/$profileId',
+    path: '/attendee/event/$eventId/$profileId',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof ProtectedIndexRoute
   '/login': typeof AuthLoginRoute
   '/signup': typeof AuthSignupRoute
-  '/selfie': typeof ProtectedAttendeeSelfieRoute
-  '/dashboard': typeof ProtectedOrganizerDashboardRoute
-  '/event/$eventId': typeof ProtectedEventEventIdRoute
+  '/attendee/invite': typeof ProtectedAttendeeInviteRoute
+  '/attendee/selfie': typeof ProtectedAttendeeSelfieRoute
+  '/organizer/dashboard': typeof ProtectedOrganizerDashboardRoute
+  '/organizer/event/$eventId': typeof ProtectedOrganizerEventEventIdRoute
+  '/attendee/event/$eventId/$profileId': typeof ProtectedAttendeeEventEventIdProfileIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
   '/signup': typeof AuthSignupRoute
   '/': typeof ProtectedIndexRoute
-  '/selfie': typeof ProtectedAttendeeSelfieRoute
-  '/dashboard': typeof ProtectedOrganizerDashboardRoute
-  '/event/$eventId': typeof ProtectedEventEventIdRoute
+  '/attendee/invite': typeof ProtectedAttendeeInviteRoute
+  '/attendee/selfie': typeof ProtectedAttendeeSelfieRoute
+  '/organizer/dashboard': typeof ProtectedOrganizerDashboardRoute
+  '/organizer/event/$eventId': typeof ProtectedOrganizerEventEventIdRoute
+  '/attendee/event/$eventId/$profileId': typeof ProtectedAttendeeEventEventIdProfileIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -75,9 +93,11 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/signup': typeof AuthSignupRoute
   '/_protected/': typeof ProtectedIndexRoute
-  '/_protected/_attendee/selfie': typeof ProtectedAttendeeSelfieRoute
-  '/_protected/_organizer/dashboard': typeof ProtectedOrganizerDashboardRoute
-  '/_protected/event/$eventId': typeof ProtectedEventEventIdRoute
+  '/_protected/attendee/invite': typeof ProtectedAttendeeInviteRoute
+  '/_protected/attendee/selfie': typeof ProtectedAttendeeSelfieRoute
+  '/_protected/organizer/dashboard': typeof ProtectedOrganizerDashboardRoute
+  '/_protected/organizer/event/$eventId': typeof ProtectedOrganizerEventEventIdRoute
+  '/_protected/attendee/event/$eventId/$profileId': typeof ProtectedAttendeeEventEventIdProfileIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -85,20 +105,32 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/signup'
-    | '/selfie'
-    | '/dashboard'
-    | '/event/$eventId'
+    | '/attendee/invite'
+    | '/attendee/selfie'
+    | '/organizer/dashboard'
+    | '/organizer/event/$eventId'
+    | '/attendee/event/$eventId/$profileId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/signup' | '/' | '/selfie' | '/dashboard' | '/event/$eventId'
+  to:
+    | '/login'
+    | '/signup'
+    | '/'
+    | '/attendee/invite'
+    | '/attendee/selfie'
+    | '/organizer/dashboard'
+    | '/organizer/event/$eventId'
+    | '/attendee/event/$eventId/$profileId'
   id:
     | '__root__'
     | '/_protected'
     | '/_auth/login'
     | '/_auth/signup'
     | '/_protected/'
-    | '/_protected/_attendee/selfie'
-    | '/_protected/_organizer/dashboard'
-    | '/_protected/event/$eventId'
+    | '/_protected/attendee/invite'
+    | '/_protected/attendee/selfie'
+    | '/_protected/organizer/dashboard'
+    | '/_protected/organizer/event/$eventId'
+    | '/_protected/attendee/event/$eventId/$profileId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -137,25 +169,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_protected/event/$eventId': {
-      id: '/_protected/event/$eventId'
-      path: '/event/$eventId'
-      fullPath: '/event/$eventId'
-      preLoaderRoute: typeof ProtectedEventEventIdRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_protected/_organizer/dashboard': {
-      id: '/_protected/_organizer/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
+    '/_protected/organizer/dashboard': {
+      id: '/_protected/organizer/dashboard'
+      path: '/organizer/dashboard'
+      fullPath: '/organizer/dashboard'
       preLoaderRoute: typeof ProtectedOrganizerDashboardRouteImport
       parentRoute: typeof ProtectedRoute
     }
-    '/_protected/_attendee/selfie': {
-      id: '/_protected/_attendee/selfie'
-      path: '/selfie'
-      fullPath: '/selfie'
+    '/_protected/attendee/selfie': {
+      id: '/_protected/attendee/selfie'
+      path: '/attendee/selfie'
+      fullPath: '/attendee/selfie'
       preLoaderRoute: typeof ProtectedAttendeeSelfieRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/attendee/invite': {
+      id: '/_protected/attendee/invite'
+      path: '/attendee/invite'
+      fullPath: '/attendee/invite'
+      preLoaderRoute: typeof ProtectedAttendeeInviteRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/organizer/event/$eventId': {
+      id: '/_protected/organizer/event/$eventId'
+      path: '/organizer/event/$eventId'
+      fullPath: '/organizer/event/$eventId'
+      preLoaderRoute: typeof ProtectedOrganizerEventEventIdRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/attendee/event/$eventId/$profileId': {
+      id: '/_protected/attendee/event/$eventId/$profileId'
+      path: '/attendee/event/$eventId/$profileId'
+      fullPath: '/attendee/event/$eventId/$profileId'
+      preLoaderRoute: typeof ProtectedAttendeeEventEventIdProfileIdRouteImport
       parentRoute: typeof ProtectedRoute
     }
   }
@@ -163,16 +209,21 @@ declare module '@tanstack/react-router' {
 
 interface ProtectedRouteChildren {
   ProtectedIndexRoute: typeof ProtectedIndexRoute
+  ProtectedAttendeeInviteRoute: typeof ProtectedAttendeeInviteRoute
   ProtectedAttendeeSelfieRoute: typeof ProtectedAttendeeSelfieRoute
   ProtectedOrganizerDashboardRoute: typeof ProtectedOrganizerDashboardRoute
-  ProtectedEventEventIdRoute: typeof ProtectedEventEventIdRoute
+  ProtectedOrganizerEventEventIdRoute: typeof ProtectedOrganizerEventEventIdRoute
+  ProtectedAttendeeEventEventIdProfileIdRoute: typeof ProtectedAttendeeEventEventIdProfileIdRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedIndexRoute: ProtectedIndexRoute,
+  ProtectedAttendeeInviteRoute: ProtectedAttendeeInviteRoute,
   ProtectedAttendeeSelfieRoute: ProtectedAttendeeSelfieRoute,
   ProtectedOrganizerDashboardRoute: ProtectedOrganizerDashboardRoute,
-  ProtectedEventEventIdRoute: ProtectedEventEventIdRoute,
+  ProtectedOrganizerEventEventIdRoute: ProtectedOrganizerEventEventIdRoute,
+  ProtectedAttendeeEventEventIdProfileIdRoute:
+    ProtectedAttendeeEventEventIdProfileIdRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(

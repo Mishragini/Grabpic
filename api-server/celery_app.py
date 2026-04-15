@@ -221,22 +221,13 @@ def _match_photo(image_bytes,event_id:str):
     if not match:
         raise ValueError("No matching profile found")
     
-    profile_id = match[0]["id"]
+    profile = match[0]
     
-    map_db_res = supabase.table("face_photo_map")\
-        .select("photo_id")\
-            .eq("face_profile_id",profile_id)\
-                .execute()
-                
-    map_data = cast(list[dict],map_db_res.data)
-    photo_ids = [row["photo_id"] for row in map_data]
-    
-    photos_db_res = supabase.table("photos")\
-        .select("*")\
-            .in_("id",photo_ids)\
-                .execute()
-    photos = cast(list[dict],photos_db_res.data)            
-    return {"message":"Matching photos fetched successfully","data":photos}                       
+    if profile:
+        url = supabase.storage.from_("face-crops").get_public_url(profile["representative_crop_path"])
+        profile["photo_url"]=url
+              
+    return {"message":"Matching photos fetched successfully","data":{"profile_id":profile["id"],"photo_url":profile["photo_url"]}}                       
 
 process_photo = cast(Task,_process_photo)
 

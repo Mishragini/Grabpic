@@ -1,10 +1,12 @@
 from fastapi import FastAPI,WebSocket,WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from routers.auth import auth_router
-from routers.space import space_router
-from routers.photo.organizer import organizer_photo_router
-from routers.photo.attendee import attendee_photo_router
-from routers.profiles import profile_router
+from routers.organizer.space import organizer_space_router
+from routers.organizer.photos import organizer_photo_router
+from routers.attendee.photos import attendee_photo_router
+from routers.organizer.profiles import organizer_profile_router
+from routers.attendee.event import attendee_space_router
+from routers.attendee.profile import attendee_profile_router
 import redis.asyncio as aioredis
 import json
 import logging
@@ -22,10 +24,13 @@ app.add_middleware(
 )
 
 app.include_router(auth_router,prefix="/api/auth")
-app.include_router(space_router,prefix="/api/spaces")
+app.include_router(organizer_space_router,prefix="/api/organizer/spaces")
 app.include_router(organizer_photo_router,prefix="/api/organizer/photos")
 app.include_router(attendee_photo_router,prefix="/api/attendee/photos")
-app.include_router(profile_router,prefix="/api/profiles")
+app.include_router(organizer_profile_router,prefix="/api/organizer/profiles")
+app.include_router(attendee_space_router,prefix="/api/attendee/spaces")
+app.include_router(attendee_profile_router,prefix="/api/attendee/profiles")
+
 
 @app.get("/")
 async def root():
