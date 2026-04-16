@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 
 import { Profiles } from "../Profiles";
 import { ShareEventDialog } from "../ShareEventDialog";
+import { DeleteEvent } from "../DeleteEvent";
 
 export function EventCard({
   event,
@@ -20,6 +21,10 @@ export function EventCard({
       )}
     >
       <>
+        <div className="flex w-full items-end justify-end p-2">
+          <DeleteEvent event_id={event.id} />
+        </div>
+
         <CardHeader className="gap-1 space-y-0 pb-2 pt-5">
           <div className="flex items-center justify-between">
             <div>

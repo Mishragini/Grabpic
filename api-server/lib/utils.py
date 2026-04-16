@@ -59,4 +59,31 @@ def fetch_event_profiles(event_id:str,page:int,per_page:int):
             url = supabase.storage.from_("face-crops").get_public_url(profile["representative_crop_path"])
             profile["photo_url"] = url
             
-    return{"profiles":profile_data,"hasMore":hasMore}                     
+    return{"profiles":profile_data,"hasMore":hasMore}
+
+def delete_bucket_folder(bucket:str,folder_prefix:str):
+    listed = supabase.storage.from_(bucket).list(folder_prefix)
+    
+    if not listed:
+        return
+    
+    file_paths = []
+    subfolder_paths = []
+    
+    for item in listed:
+        full_path = f"{folder_prefix}/{item['name']}"
+        
+        #item.get("id") returns null for folder and a real uuid for files
+        if item.get("id") is None:
+            subfolder_paths.append(full_path)
+            
+        else:
+            file_paths.append(full_path)
+            
+    if file_paths:
+        supabase.storage.from_(bucket).remove(paths=file_paths)
+    
+    #face-crops and inconclusive-crops
+    #recursive call with the folders prefix when only event_id is provided   
+    for subfolder in subfolder_paths:
+        delete_bucket_folder(bucket,subfolder)                                 

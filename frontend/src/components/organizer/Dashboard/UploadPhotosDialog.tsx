@@ -67,7 +67,7 @@ export function UploadPhotoDilaog({ event_id }: { event_id: string }) {
       open={open}
       onOpenChange={(val) => {
         setOpen(val);
-        if (!val) resetDialog();
+        if (!val && step === 0) resetDialog();
       }}
     >
       <ButtonDialogTrigger className="flex h-9 items-center rounded-lg border border-dashed border-(--line) bg-muted/30 px-3 text-xs text-muted-foreground">

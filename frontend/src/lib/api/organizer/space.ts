@@ -33,3 +33,12 @@ export const getSpaceById = async (event_id: string) => {
 
     }
 }
+
+export const deleteEvent = async (event_id: string) => {
+    try {
+        const api_response = await api.delete(`/api/organizer/spaces/${event_id}`)
+        return api_response
+    } catch (error) {
+        throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Failed to delete the event:(")
+    }
+}

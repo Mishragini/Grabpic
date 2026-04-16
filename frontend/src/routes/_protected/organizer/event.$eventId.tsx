@@ -1,6 +1,7 @@
 import { EventHeader } from "#/components/EventHeader";
 import { GalleryHeader } from "#/components/GalleryHeader";
 import { ScreenLoader } from "#/components/Loaders/ScreenLoader";
+import { DeleteEvent } from "#/components/organizer/DeleteEvent";
 import { AssignProfile } from "#/components/organizer/Event/AssignProfileDialog";
 import { OrganizerGallery } from "#/components/organizer/Event/Gallery";
 import { InconclusiveProfile } from "#/components/organizer/Event/InconclusiveProfile";
@@ -8,8 +9,6 @@ import { ProfileDialog } from "#/components/organizer/Event/ProfileDialog";
 import { Profiles } from "#/components/organizer/Profiles";
 import { ShareEventDialog } from "#/components/organizer/ShareEventDialog";
 import { getSpaceById } from "#/lib/api/organizer/space";
-import { useAppSelector } from "#/redux/hooks";
-import { selectUser } from "#/redux/userSlice";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -40,7 +39,10 @@ function RouteComponent() {
         ) : (
           <EventHeader event={data} />
         )}
-        <ShareEventDialog event={data} />
+        <div className="flex items-center gap-2">
+          <ShareEventDialog event={data} />
+          <DeleteEvent event_id={event_id} />
+        </div>
       </div>
 
       <div className="mt-7 grid gap-8">

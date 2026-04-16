@@ -31,3 +31,16 @@ export const fetchEventPhotos = async (event_id: string, page: number, per_page:
         throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to fetch photos for the event :(")
     }
 }
+
+export const deletePhoto = async (photo_id: string, event_id: string) => {
+    try {
+        const api_response = await api.delete(`/api/organizer/photos/${photo_id}`, {
+            params: {
+                event_id
+            }
+        })
+        return api_response
+    } catch (error) {
+        throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to fetch photos for the event :(")
+    }
+}

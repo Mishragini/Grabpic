@@ -6,7 +6,8 @@ interface Profile {
 
 interface Photo {
     id: string,
-    photo_url: string
+    photo_url: string,
+    event_id: string
 }
 
 export enum Role {

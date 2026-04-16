@@ -34,9 +34,9 @@ def _process_photo(self,photos:list,event_id:str):
             #upload the photo to supabase storage
             filename = content["filename"] or f"{uuid.uuid4()}.jpg"
             content_type = content["content_type"] or "image/jpeg"
-            storage_path=filename
+            storage_path=f"{event_id}/{filename}"
             try:
-                supabase.storage.from_('photos').upload(filename, base64.b64decode(content["data"]), {"content-type": content_type})
+                supabase.storage.from_('photos').upload(storage_path, base64.b64decode(content["data"]), {"content-type": content_type})
             except Exception as e:
                 if "already exists" in str(e).lower() or "duplicate" in str(e).lower():
                     pass
@@ -125,7 +125,7 @@ def _process_photo(self,photos:list,event_id:str):
                     _, buffer = cv2.imencode(".jpg", face_crop)
                     face_bytes = buffer.tobytes()  
                    
-                    face_crop_path = f"{uuid.uuid4()}/{storage_path.replace('/','_')}"
+                    face_crop_path = f"{event_id}/{photo_id}/{uuid.uuid4()}.jpg"
 
                     # filter on the basis of detection confidence -> store it in inconclusive storage for the orgnizer to review
                     if face.detection_confidence < 0.7:

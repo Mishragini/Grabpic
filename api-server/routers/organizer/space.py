@@ -1,9 +1,10 @@
-from fastapi import APIRouter,Depends,Request,Query,Body,HTTPException
+from fastapi import APIRouter,Depends,Request,Query,Body,HTTPException,Response
 from pydantic import BaseModel
 from lib.middleware import authMiddleware,organizerMiddleware
 from lib.database import supabase
-from lib.utils  import generate_invite_code,check_event
+from lib.utils  import generate_invite_code,check_event,delete_bucket_folder
 from typing import cast,Annotated
+import asyncio
 
 organizer_space_router = APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
 
@@ -63,4 +64,16 @@ async def fetch_space(req:Request,event_id:str):
                 
     event = cast(dict,db_res.data[0])
     
-    return {"message":f"Event with {event_id} fetched successfully!","data":event}            
+    return {"message":f"Event with {event_id} fetched successfully!","data":event}
+
+@organizer_space_router.delete("/{event_id}",status_code=204)
+async def delete_event(req:Request,event_id:str):
+    check_event(event_id,req.state.user["id"])
+    
+    await asyncio.gather(
+        asyncio.to_thread(delete_bucket_folder,"photos",event_id),
+        asyncio.to_thread(delete_bucket_folder,"face-crops",event_id),
+        asyncio.to_thread(delete_bucket_folder,"inconclusive-crops",event_id)
+    )
+    
+    supabase.table("events").delete().eq("id",event_id).execute()  

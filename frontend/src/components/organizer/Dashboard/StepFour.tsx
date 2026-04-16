@@ -45,7 +45,7 @@ export function StepFour({
         ws.close();
       }
     };
-    ws.onerror = () => {
+    ws.onerror = (error) => {
       toast.error("Lost connection to processing updates.");
     };
 
@@ -54,6 +54,9 @@ export function StepFour({
 
   useEffect(() => {
     if (!completed) return;
+    void queryClient.invalidateQueries({
+      queryKey: ["spaces"],
+    });
     void queryClient.invalidateQueries({
       queryKey: ["event-profiles", event_id],
     });
