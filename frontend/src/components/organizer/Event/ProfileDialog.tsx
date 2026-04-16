@@ -1,10 +1,6 @@
-import { InfiniteScrollLoader } from "#/components/Loaders/InfiniteScrollLoader";
 import { Button } from "#/components/ui/button";
 import { Dialog } from "#/components/ui/dialog";
-import {
-  fetchEventProfiles,
-  mergeProfiles,
-} from "#/lib/api/organizer/profiles";
+import { mergeProfiles } from "#/lib/api/organizer/profiles";
 import type { Profile } from "#/lib/types/type";
 import {
   useInfiniteQuery,
@@ -13,7 +9,6 @@ import {
 } from "@tanstack/react-query";
 import { Loader2Icon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
 import { toast } from "sonner";
 import { DialogProfilePreview } from "../DialogProfilesPreview";
 import { KeepProfile } from "../KeepProfile";
@@ -27,8 +22,13 @@ import {
   DialogStep,
 } from "#/components/CommonDialog";
 import { ScreenLoader } from "#/components/Loaders/ScreenLoader";
+import { fetchEventProfiles } from "#/lib/api/fetchProfile";
+import { useAppSelector } from "#/redux/hooks";
+import { selectUser } from "#/redux/userSlice";
+import { EventProfilesDisplay } from "#/components/EventProfiles";
 
 export function ProfileDialog({ event_id }: { event_id: string }) {
+  const user = useAppSelector(selectUser);
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [profiles_to_merge, setProfilesToMerge] = useState<Profile[]>([]);
@@ -40,10 +40,13 @@ export function ProfileDialog({ event_id }: { event_id: string }) {
 
   const { fetchNextPage, hasNextPage, data, isPending } = useInfiniteQuery({
     queryKey: ["event-profiles", event_id, "paginated"],
-    queryFn: ({ pageParam }) => fetchEventProfiles(event_id, pageParam, 6),
+    queryFn: ({ pageParam }) => {
+      if (!user) return;
+      return fetchEventProfiles(event_id, pageParam, 6, user?.role);
+    },
     initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
-      lastPage.hasMore ? lastPageParam + 1 : undefined,
+      lastPage?.hasMore ? lastPageParam + 1 : undefined,
   });
 
   const toggleProfile = useCallback((page: Profile) => {
@@ -55,7 +58,7 @@ export function ProfileDialog({ event_id }: { event_id: string }) {
   }, []);
 
   const profiles = useMemo(
-    () => data?.pages.flatMap((p) => p.profiles) ?? [],
+    () => data?.pages.flatMap((p) => p?.profiles) ?? [],
     [data],
   );
 
@@ -139,29 +142,21 @@ export function ProfileDialog({ event_id }: { event_id: string }) {
                   </span>
                 ) : null}
               </div>
-              <div
-                id="profile-scroll"
-                className="max-h-[min(280px,42vh)] overflow-y-auto rounded-lg border border-border/60 bg-muted/15 p-3"
+              <EventProfilesDisplay
+                hasNextPage={hasNextPage}
+                total_loaded={totalLoaded}
+                fetchNextPage={fetchNextPage}
               >
-                <InfiniteScroll
-                  next={fetchNextPage}
-                  hasMore={!!hasNextPage}
-                  dataLength={totalLoaded}
-                  loader={<InfiniteScrollLoader />}
-                  scrollableTarget="profile-scroll"
-                  className="grid grid-cols-3 gap-2.5 sm:gap-3"
-                >
-                  {profiles.map((page: Profile) => {
-                    return (
-                      <DialogProfilePreview
-                        page={page}
-                        selected={selected_ids.has(page.id)}
-                        toggle={toggleProfile}
-                      />
-                    );
-                  })}
-                </InfiniteScroll>
-              </div>
+                {profiles.map((page: Profile) => {
+                  return (
+                    <DialogProfilePreview
+                      page={page}
+                      selected={selected_ids.has(page.id)}
+                      toggle={toggleProfile}
+                    />
+                  );
+                })}
+              </EventProfilesDisplay>
               {hasNextPage && profiles_to_merge.length > 0 ? (
                 <p className="text-xs leading-relaxed text-muted-foreground">
                   Load every profile in this list (scroll to the end) before

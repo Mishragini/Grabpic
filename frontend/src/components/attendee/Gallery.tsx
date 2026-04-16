@@ -16,7 +16,6 @@ export function AttendeeGallery({ profile_id }: { profile_id: string }) {
     if (!data) return [];
     return data?.pages.flatMap((page) => page.data);
   }, [data]);
-  console.log("photos...", photos);
   if (isLoading) {
     return (
       <div className="flex h-24 items-center rounded-lg border border-dashed border-(--line) bg-muted/20 px-3 text-sm text-muted-foreground">

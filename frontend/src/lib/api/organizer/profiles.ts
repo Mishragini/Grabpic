@@ -1,21 +1,6 @@
 import { AxiosError } from "axios"
 import api from "../apiCall"
 
-export const fetchEventProfiles = async (event_id: string, page: number = 0, per_page: number = 10) => {
-    try {
-        const profile_response = await api.get("/api/organizer/profiles", {
-            params: {
-                event_id,
-                page,
-                per_page
-            }
-        })
-        return { profiles: profile_response.data.data, hasMore: profile_response.data.hasMore }
-    } catch (error) {
-        throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to get profiles :(")
-    }
-}
-
 export const mergeProfiles = async (profiles_to_merge: string[], profile_to_merge_with: string) => {
     try {
         const api_response = await api.post("/api/organizer/profiles/duplicates/remove", {

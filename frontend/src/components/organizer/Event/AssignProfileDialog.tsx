@@ -3,7 +3,6 @@ import { Button } from "#/components/ui/button";
 import { Dialog } from "#/components/ui/dialog";
 import {
   assignInconclusiveProfile,
-  fetchEventProfiles,
   fetchInconclusiveProfiles,
 } from "#/lib/api/organizer/profiles";
 import {
@@ -26,8 +25,12 @@ import {
   DialogStep,
 } from "#/components/CommonDialog";
 import { ScreenLoader } from "#/components/Loaders/ScreenLoader";
+import { useAppSelector } from "#/redux/hooks";
+import { selectUser } from "#/redux/userSlice";
+import { fetchEventProfiles } from "#/lib/api/fetchProfile";
 
 export function AssignProfile({ event_id }: { event_id: string }) {
+  const user = useAppSelector(selectUser);
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
@@ -45,9 +48,12 @@ export function AssignProfile({ event_id }: { event_id: string }) {
   const { data, hasNextPage, fetchNextPage } = useInfiniteQuery({
     queryKey: ["event-profiles", event_id, "paginated"],
     initialPageParam: 0,
-    queryFn: ({ pageParam }) => fetchEventProfiles(event_id, pageParam, 6),
+    queryFn: ({ pageParam }) => {
+      if (!user) return;
+      return fetchEventProfiles(event_id, pageParam, 6, user.role);
+    },
     getNextPageParam: (lastPage, _, lastPageParam) =>
-      lastPage.hasMore ? lastPageParam + 1 : undefined,
+      lastPage?.hasMore ? lastPageParam + 1 : undefined,
     enabled: step === 1,
   });
 
@@ -81,7 +87,7 @@ export function AssignProfile({ event_id }: { event_id: string }) {
 
   const profiles = useMemo(() => {
     if (!data) return [];
-    return data.pages.flatMap((page) => page.profiles);
+    return data.pages.flatMap((page) => page?.profiles);
   }, [data]);
 
   const { mutate, isPending: isAssigning } = useMutation({

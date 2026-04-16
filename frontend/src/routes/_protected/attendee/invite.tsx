@@ -52,11 +52,11 @@ function RouteComponent() {
         <Button type="submit">Submit</Button>
       </form>
       {event_id && (
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <CommonDialogContent>
-            <Selfie event_id={event_id} />
-          </CommonDialogContent>
-        </Dialog>
+        <Selfie
+          event_id={event_id}
+          dialogOpen={dialogOpen}
+          setDialogOpen={setDialogOpen}
+        />
       )}
     </div>
   );

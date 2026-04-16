@@ -1,7 +1,7 @@
 from fastapi import APIRouter,UploadFile,File,Form,HTTPException,Request,Query,Depends
 from typing import Annotated,cast
 from celery_app import match_photo
-from lib.utils import check_event_attendee
+from lib.utils import check_event_attendee,fetch_event_profiles
 from lib.database import supabase
 from lib.middleware import authMiddleware
 import asyncio
@@ -26,19 +26,9 @@ async def match_selfie(photo:Annotated[UploadFile,File()],event_id:Annotated[str
 
 #why would the attendee need the profiles -> maybe his selfie didnt match
 @attendee_profile_router.get("/")
-async def get_profiles(req:Request,invite_code:Annotated[str,Query()]):
-    event = check_event_attendee(invite_code)
+async def get_profiles(event_id:Annotated[str,Query()],page:Annotated[int,Query()],per_page:Annotated[int,Query()]):
+    check_event_attendee(event_id)
     
-    event_name = event["name"]         
-  
-    profile_db_res = supabase.table("face_profiles")\
-        .select("*")\
-            .eq("event_id",event["id"])\
-                .execute()
+    data= fetch_event_profiles(event_id,page,per_page)
     
-    profile_data = cast(list[dict],profile_db_res.data)  
-    
-    if not profile_data:
-        raise HTTPException(status_code=404,detail=f"No profiles found for event:{event_name}")
-    
-    return {"message":"Profiles fetched successfully","data":profile_data}                
+    return{"message":"Profiles fetched successfully","data":data["profiles"],"hasMore":data["hasMore"]}

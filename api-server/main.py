@@ -6,7 +6,7 @@ from routers.organizer.photos import organizer_photo_router
 from routers.attendee.photos import attendee_photo_router
 from routers.organizer.profiles import organizer_profile_router
 from routers.attendee.event import attendee_space_router
-from routers.attendee.profile import attendee_profile_router
+from routers.attendee.profiles import attendee_profile_router
 import redis.asyncio as aioredis
 import json
 import logging

@@ -3,7 +3,7 @@ from lib.middleware import authMiddleware,organizerMiddleware
 from lib.database import supabase
 from typing import Annotated,cast
 from pydantic import BaseModel,UUID4
-from lib.utils import check_event
+from lib.utils import check_event,fetch_event_profiles
 
 organizer_profile_router=APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
 
@@ -11,26 +11,9 @@ organizer_profile_router=APIRouter(dependencies=[Depends(authMiddleware),Depends
 async def fetch_profiles(req:Request,event_id:Annotated[str,Query()],page:Annotated[int,Query()],per_page:Annotated[int,Query()]):
     check_event(event_id,req.state.user["id"])
               
-    profile_db_res = supabase.table("face_profiles")\
-        .select("representative_crop_path","id")\
-            .eq("event_id",event_id)\
-                .range(page*per_page,((page+1)* per_page))\
-                .execute()
+    data= fetch_event_profiles(event_id,page,per_page)
     
-    profile_data = cast(list[dict],profile_db_res.data)
-    
-    hasMore = False
-    
-    if len(profile_data) > per_page:
-        hasMore = True
-        profile_data.pop()
-    
-    if profile_data:
-        for profile in profile_data:
-            url = supabase.storage.from_("face-crops").get_public_url(profile["representative_crop_path"])
-            profile["photo_url"] = url
-    
-    return{"message":"Profiles fetched successfully","data":profile_data,"hasMore":hasMore}
+    return{"message":"Profiles fetched successfully","data":data["profiles"],"hasMore":data["hasMore"]}
 
 class RemoveDuplicateProfileReq(BaseModel):
     profile_id:str

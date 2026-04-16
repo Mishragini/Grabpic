@@ -2,10 +2,23 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { matchSelfie } from "#/lib/api/attendee/profiles";
 import { useNavigate } from "@tanstack/react-router";
+import { CommonDialogContent } from "../CommonDialog";
+import { Dialog } from "../ui/dialog";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { ProfileOptions } from "./ProfileOptions";
+import { useCamera } from "#/hooks/camera";
 
-export function Selfie({ event_id }: { event_id: string }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+export function Selfie({
+  event_id,
+  dialogOpen,
+  setDialogOpen,
+}: {
+  event_id: string;
+  dialogOpen: boolean;
+  setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const camera = useCamera();
   const [photo, setPhoto] = useState<string | null>(null);
   const [profileUrl, setProfileUrl] = useState<string | null>(null);
   const [step, setStep] = useState(0);
@@ -13,85 +26,114 @@ export function Selfie({ event_id }: { event_id: string }) {
 
   const navigate = useNavigate();
 
+  const resetDialog = useCallback(() => {
+    setStep(0);
+    setPhoto(null);
+    setProfileId(null);
+    setProfileUrl(null);
+  }, []);
+
   useEffect(() => {
-    if (step !== 0) return;
-    let stream: MediaStream | null = null;
-    const fetchUserMediaStream = async () => {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-    };
-    fetchUserMediaStream();
-    return () => {
-      stream?.getTracks().forEach((track) => track.stop());
-    };
-  }, [step]);
+    if (dialogOpen) {
+      camera.start();
+    } else {
+      camera.stop();
+      resetDialog();
+    }
+  }, [dialogOpen]);
 
   const takePhoto = useCallback(() => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
+    const url = camera.capture();
+    if (url) {
+      setPhoto(url);
+    }
+    camera.stop();
+    setStep((c) => c + 1);
+  }, [camera, setStep]);
 
-    if (!video || !canvas) return;
+  const { mutate, isError, isPending } = useMutation({
+    mutationKey: ["user-profile"],
+    mutationFn: async (data: { photo: string; event_id: string }) => {
+      const res = await matchSelfie(data.photo, data.event_id);
+      setProfileUrl(res.photo_url);
+      setProfileId(res.profile_id);
+    },
+    onSuccess: () => {
+      toast.success("Fetched matching profile.");
+      setStep((c) => c + 1);
+    },
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const ctx = canvas.getContext("2d");
-    ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const dataUrl = canvas.toDataURL("image/png");
-    setPhoto(dataUrl);
-    setStep((c) => (c = 1));
-  }, [canvasRef, videoRef]);
+    onError: (data) => {
+      toast.error(data.message);
+      setStep((c) => c + 1);
+    },
+  });
 
   const fetchSelfieProfile = useCallback(async () => {
     if (!photo) {
-      console.log("here");
       return;
     }
-    const res = await matchSelfie(photo, event_id);
-    setProfileUrl(res.photo_url);
-    setStep((c) => c + 1);
-    console.log("res...", res);
-    setProfileId(res.profile_id);
-  }, [photo]);
+    mutate({ photo, event_id });
+  }, [photo, mutate, event_id]);
 
   return (
-    <div className="p-4">
-      {step === 0 && (
-        <>
-          <div>Selfie</div>
-          <video ref={videoRef} autoPlay playsInline muted />
-          <Button onClick={takePhoto}>Click</Button>
-          <canvas ref={canvasRef} className="hidden" />
-        </>
-      )}
-      {step === 1 && photo && (
-        <div>
-          <img src={photo} alt="Captured selfie" />
-          <Button disabled={!photo} onClick={fetchSelfieProfile}>
-            Fetch profile
-          </Button>
+    <Dialog open={dialogOpen} onOpenChange={(val) => setDialogOpen(val)}>
+      <CommonDialogContent>
+        <div className="p-4">
+          {step === 0 && (
+            <>
+              <div>Selfie</div>
+              <video ref={camera.videoRef} autoPlay playsInline muted />
+              <Button onClick={takePhoto}>Click</Button>
+            </>
+          )}
+          {step === 1 && photo && (
+            <div>
+              <img src={photo} alt="Captured selfie" />
+              <Button disabled={!photo} onClick={fetchSelfieProfile}>
+                Fetch profile
+              </Button>
+            </div>
+          )}
+          {step === 2 && isError && (
+            <div>
+              <div>Could not find matching profiles</div>
+              <div>Select your profilefrom the below profiles</div>
+              <ProfileOptions
+                event_id={event_id}
+                setProfileId={setProfileId}
+                profile_id={profile_id}
+              />
+              <Button
+                onClick={() => {
+                  if (!event_id || !profile_id) return;
+                  navigate({
+                    to: `/attendee/event/${event_id}/${profile_id}`,
+                  });
+                }}
+              >
+                fetch photos
+              </Button>
+            </div>
+          )}
+          {step === 2 && profileUrl && (
+            <div>
+              <div>confirm your profile</div>
+              <img src={profileUrl} alt="profile" className="h-24 w-24" />
+              <Button
+                onClick={() => {
+                  if (!event_id || !profile_id) return;
+                  navigate({
+                    to: `/attendee/event/${event_id}/${profile_id}`,
+                  });
+                }}
+              >
+                fetch photos
+              </Button>
+            </div>
+          )}
         </div>
-      )}
-      {step === 2 && profileUrl && (
-        <div>
-          <div>confirm your profile</div>
-          <img src={profileUrl} alt="profile" className="h-24 w-24" />
-          <Button
-            onClick={() => {
-              if (!event_id || !profile_id) return;
-              navigate({ to: `/attendee/event/${event_id}/${profile_id}` });
-            }}
-          >
-            fetch photos
-          </Button>
-        </div>
-      )}
-    </div>
+      </CommonDialogContent>
+    </Dialog>
   );
 }
