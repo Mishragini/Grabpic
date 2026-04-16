@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { matchSelfie } from "#/lib/api/attendee/profiles";
 import { useNavigate } from "@tanstack/react-router";
@@ -51,7 +51,7 @@ export function Selfie({
     setStep((c) => c + 1);
   }, [camera, setStep]);
 
-  const { mutate, isError, isPending } = useMutation({
+  const { mutate, isError } = useMutation({
     mutationKey: ["user-profile"],
     mutationFn: async (data: { photo: string; event_id: string }) => {
       const res = await matchSelfie(data.photo, data.event_id);
@@ -79,32 +79,66 @@ export function Selfie({
   return (
     <Dialog open={dialogOpen} onOpenChange={(val) => setDialogOpen(val)}>
       <CommonDialogContent>
-        <div className="p-4">
+        <div className="space-y-4 p-5 sm:p-6">
           {step === 0 && (
-            <>
-              <div>Selfie</div>
-              <video ref={camera.videoRef} autoPlay playsInline muted />
-              <Button onClick={takePhoto}>Click</Button>
-            </>
+            <div className="space-y-4">
+              <div>
+                <p className="island-kicker">Step 1</p>
+                <h2 className="display-title mt-1 text-xl text-foreground">
+                  Capture a selfie
+                </h2>
+              </div>
+              <video
+                ref={camera.videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="aspect-4/3 w-full rounded-xl border border-border/70 bg-muted object-cover"
+              />
+              <Button onClick={takePhoto} className="w-full rounded-xl">
+                Capture
+              </Button>
+            </div>
           )}
           {step === 1 && photo && (
-            <div>
-              <img src={photo} alt="Captured selfie" />
-              <Button disabled={!photo} onClick={fetchSelfieProfile}>
-                Fetch profile
+            <div className="space-y-4">
+              <div>
+                <p className="island-kicker">Step 2</p>
+                <h2 className="display-title mt-1 text-xl text-foreground">
+                  Confirm selfie
+                </h2>
+              </div>
+              <img
+                src={photo}
+                alt="Captured selfie"
+                className="aspect-4/3 w-full rounded-xl border border-border/70 object-cover"
+              />
+              <Button
+                disabled={!photo}
+                onClick={fetchSelfieProfile}
+                className="w-full rounded-xl"
+              >
+                Find my profile
               </Button>
             </div>
           )}
           {step === 2 && isError && (
-            <div>
-              <div>Could not find matching profiles</div>
-              <div>Select your profilefrom the below profiles</div>
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <p className="text-base font-semibold text-foreground">
+                  We could not find an exact match
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Select your profile from the list below.
+                </p>
+              </div>
               <ProfileOptions
                 event_id={event_id}
                 setProfileId={setProfileId}
                 profile_id={profile_id}
               />
               <Button
+                className="w-full rounded-xl"
                 onClick={() => {
                   if (!event_id || !profile_id) return;
                   navigate({
@@ -112,15 +146,25 @@ export function Selfie({
                   });
                 }}
               >
-                fetch photos
+                Continue to photos
               </Button>
             </div>
           )}
           {step === 2 && profileUrl && (
-            <div>
-              <div>confirm your profile</div>
-              <img src={profileUrl} alt="profile" className="h-24 w-24" />
+            <div className="space-y-4">
+              <div>
+                <p className="island-kicker">Final Step</p>
+                <h2 className="display-title mt-1 text-xl text-foreground">
+                  Confirm your profile
+                </h2>
+              </div>
+              <img
+                src={profileUrl}
+                alt="profile"
+                className="h-28 w-28 rounded-full border border-border/70 object-cover"
+              />
               <Button
+                className="w-full rounded-xl"
                 onClick={() => {
                   if (!event_id || !profile_id) return;
                   navigate({
@@ -128,7 +172,7 @@ export function Selfie({
                   });
                 }}
               >
-                fetch photos
+                Continue to photos
               </Button>
             </div>
           )}

@@ -1,7 +1,5 @@
 import { Selfie } from "#/components/attendee/Selfie";
-import { CommonDialogContent } from "#/components/CommonDialog";
 import { Button } from "#/components/ui/button";
-import { Dialog } from "#/components/ui/dialog";
 import { Input } from "#/components/ui/input";
 import { fetchEventByInviteCode } from "#/lib/api/attendee/space";
 import { createFileRoute } from "@tanstack/react-router";
@@ -40,17 +38,33 @@ function RouteComponent() {
   }, []);
 
   return (
-    <div>
-      <div>Enter your invite code for the space you want to access</div>
-      <form onSubmit={handleSubmit(fetchEvent)}>
-        <Input
-          placeholder="Invite code"
-          required
-          {...register("invite_code")}
-        />
-        {errors.invite_code?.message && <p>{errors.invite_code.message}</p>}
-        <Button type="submit">Submit</Button>
-      </form>
+    <div className=" h-screen w-full flex items-center justify-center  ">
+      <div>
+        <p className="island-kicker">Attendee Access</p>
+        <h1 className="display-title mt-2 text-2xl text-foreground">
+          Join your event
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Enter your invite code to continue and verify your profile.
+        </p>
+        <form onSubmit={handleSubmit(fetchEvent)} className="mt-6 space-y-3">
+          <Input
+            placeholder="Invite code"
+            required
+            className="h-11 rounded-xl border-border/70 bg-background/80"
+            {...register("invite_code")}
+          />
+          {errors.invite_code?.message && (
+            <p className="text-sm text-destructive">
+              {errors.invite_code.message}
+            </p>
+          )}
+          <Button type="submit" className="h-11 w-full rounded-xl">
+            Continue
+          </Button>
+        </form>
+      </div>
+
       {event_id && (
         <Selfie
           event_id={event_id}
