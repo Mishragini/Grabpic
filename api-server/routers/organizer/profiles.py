@@ -3,17 +3,19 @@ from lib.middleware import authMiddleware,organizerMiddleware
 from lib.database import supabase
 from typing import Annotated,cast
 from pydantic import BaseModel,UUID4
-from lib.utils import check_event,fetch_event_profiles
+from lib.utils import check_event,fetch_event_profiles,success_response_handler
+from lib.config import settings
+import asyncio
 
 organizer_profile_router=APIRouter(dependencies=[Depends(authMiddleware),Depends(organizerMiddleware)])
 
 @organizer_profile_router.get("/")
 async def fetch_profiles(req:Request,event_id:Annotated[str,Query()],page:Annotated[int,Query()],per_page:Annotated[int,Query()]):
-    check_event(event_id,req.state.user["id"])
+    await check_event(event_id,req.state.user["id"])
               
-    data= fetch_event_profiles(event_id,page,per_page)
+    data= await fetch_event_profiles(event_id,page,per_page)
     
-    return{"message":"Profiles fetched successfully","data":data["profiles"],"hasMore":data["hasMore"]}
+    return success_response_handler(message="Profiles fetched successfully",data={"profiles":data["profiles"],"hasMore":data["hasMore"]})
 
 class RemoveDuplicateProfileReq(BaseModel):
     profile_id:str
@@ -33,39 +35,48 @@ async def remove_duplicate_profile(request: Annotated[RemoveDuplicateProfileReq,
     
     # delete all crops from storage in one call
     if crop_paths:
-        supabase.storage.from_("face-crops").remove(crop_paths)
+        await asyncio.to_thread(supabase.storage.from_("face-crops").remove,crop_paths)
     
-    # reassign all photo mappings to the main profile
-    supabase.table("face_photo_map")\
-        .update({"face_profile_id": request.profile_id})\
-        .in_("face_profile_id", request.duplicate_profile_ids)\
-        .execute()
-    
-    # delete all duplicate profiles
-    supabase.table("face_profiles")\
-        .delete()\
-        .in_("id", request.duplicate_profile_ids)\
-        .execute()
+    #rpc call to handle delete and update in transaction
+    await asyncio.to_thread(
+       supabase.rpc("remove_duplicate_profiles",{
+           "p_profile_id":request.profile_id,
+           "p_duplicate_ids":request.duplicate_profile_ids
+       }).execute
+    )
             
-    return {"message": "Duplicate profile removed successfully!"}
+    return success_response_handler(message="Duplicate profiles removed successfully!")
 
 class AssignProfileReq(BaseModel):
-    profile_id: UUID4| None = None
-    face_crop_id:UUID4
+    profile_id: str| None = None
+    face_crop_id:str
     
 @organizer_profile_router.post("/face-crops")
 async def assign_profile(request:Annotated[AssignProfileReq,Body()]):
-    #check if profile_id exists in the db
-    if request.profile_id:
-        profile_db_res = supabase.table("face_profiles").select("*").eq("id",request.profile_id).execute()
-        if not profile_db_res.data:
-            raise HTTPException(status_code=404,detail=f"Profile with id:{request.profile_id} not found") 
     
-    #check if the face_crop_id exists in the db  
-    crops_db_res = supabase.table("face_crops")\
-        .select("*")\
+    storage_path = None
+    if request.profile_id:
+        profile_db_res,crops_db_res = await asyncio.gather(
+            #check if profile_id exists in the db
+            asyncio.to_thread(supabase.table("face_profiles").select("storage_path").eq("id",request.profile_id).execute),
+            #check if crop_id exists in the db
+            asyncio.to_thread(supabase.table("face_crops")\
+            .select("photo_id","embedding","event_id","storage_path")\
             .eq("id",request.face_crop_id)\
-                .execute()
+            .execute)
+        )
+        if not profile_db_res.data:
+            raise HTTPException(status_code=404,detail=f"Profile with id:{request.profile_id} not found")
+        else:
+            storage_path = cast(dict,profile_db_res.data[0])["storage_path"] 
+    
+    else:
+        #check if crop_id exists in the db
+        crops_db_res = await asyncio.to_thread(supabase.table("face_crops")\
+            .select("photo_id","embedding","event_id","storage_path")\
+            .eq("id",request.face_crop_id)\
+            .execute)
+        
     if not crops_db_res.data:
         raise HTTPException(status_code=404, detail=f"Face crop with id:{request.face_crop_id} not found")
     
@@ -80,51 +91,47 @@ async def assign_profile(request:Annotated[AssignProfileReq,Body()]):
     
     #if no profile_id was sent create a new profile 
     if request.profile_id is None:
-        storage_image = supabase.storage.from_("inconclusive-crops").download(storage_path)
-        supabase.storage.from_("face-crops").upload(
+        storage_image = await asyncio.to_thread(supabase.storage.from_("inconclusive-crops").download,storage_path)
+        
+        _, profile_db_res = await asyncio.gather(
+           asyncio.to_thread(supabase.storage.from_("face-crops").upload,
             storage_path,
-            storage_image
-        )
-        profile_db_res = supabase.table("face_profiles").insert({
+            storage_image),
+            asyncio.to_thread(supabase.table("face_profiles").insert({
             "photo_id":photo_id,
             "embedding":embedding,
             "event_id":event_id,
-            "representative_crop_path":storage_path
-        }).execute()
+            "representative_crop_path":storage_path,
+            "public_url":f"{settings.SUPABASE_STORAGE_URL}/face-crops/{storage_path}"
+        }).execute)
+        )
+        
         profile_data = cast(dict,profile_db_res.data[0])
         profile_id=profile_data["id"]
         
-    supabase.table("face_photo_map").insert({
-        "face_profile_id":str(profile_id),
-        "photo_id":photo_id
-    }).execute() 
+    await asyncio.to_thread(supabase.rpc("assign_profile",{
+        "p_profile_id": profile_id,
+        "p_photo_id":photo_id,
+        "p_crop_id":request.face_crop_id,
+    }).execute)    
     
-    supabase.table("face_crops").update({"processed":True}).eq("id",request.face_crop_id).execute()   
+    return success_response_handler(message="Profile assigned successfully",data={"profile_id":profile_id})  
             
-    return{"message":"Profile assigned successfully","data":{"profile_id":profile_id}}
-
-
 @organizer_profile_router.get("/inconclusives")
 async def fetch_inconclusive_profiles(req:Request,event_id:Annotated[str,Query()],page:Annotated[int,Query()]=0,per_page:Annotated[int,Query()]=10):
-    check_event(event_id,req.state.user["id"])
+    await check_event(event_id,req.state.user["id"])
     
-    db_res = supabase.table("face_crops")\
-        .select("*")\
+    db_res = await asyncio.to_thread(supabase.table("face_crops")\
+        .select("id","public_url")\
             .eq("event_id",event_id)\
                 .eq("processed",False)\
                 .range(page*per_page,(page+1)*per_page)\
-                .execute()
+                .execute)
                 
     face_crops = cast(list[dict],db_res.data)
+        
+    hasMore = len(face_crops)  > per_page
     
-    for crop in face_crops:
-        url = supabase.storage.from_("inconclusive-crops").get_public_url(crop["storage_path"])
-        crop["photo_url"] = url
-        
-    hasMore = False
+    face_crops[:per_page]
     
-    if len(face_crops)  > per_page :
-        hasMore = True
-        
-    return{"message":f"Inconclusive crops for event:{event_id} fetched successfully","data":face_crops,"hasMore":hasMore}                   
-        
+    return success_response_handler(message=f"Inconclusive crops for event:{event_id} fetched successfully",data={"face_crops":face_crops,"hasMore":hasMore})    

@@ -1,12 +1,12 @@
 interface Profile {
     representative_crop_path: string;
     id: string;
-    photo_url: string;
+    public_url: string;
 }
 
 interface Photo {
     id: string,
-    photo_url: string,
+    public_url: string,
     event_id: string
 }
 

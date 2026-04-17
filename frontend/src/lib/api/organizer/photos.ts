@@ -11,7 +11,7 @@ export const uploadPhotos = async (photos: File[], event_id: string) => {
                 "Content-Type": "multipart/form-data"
             }
         })
-        return api_response.data
+        return api_response.data.data
     } catch (error) {
         throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to upload photos :(")
     }
@@ -26,7 +26,7 @@ export const fetchEventPhotos = async (event_id: string, page: number, per_page:
                 per_page
             }
         })
-        return { data: api_response.data.data, hasMore: api_response.data.hasMore }
+        return { data: api_response.data.data.photos, hasMore: api_response.data.data.hasMore }
     } catch (error) {
         throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to fetch photos for the event :(")
     }

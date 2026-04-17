@@ -13,7 +13,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isLoading, data, isError, error } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
-      const { data } = await fetchUser();
+      const data = await fetchUser();
       return data;
     },
   });

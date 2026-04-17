@@ -10,7 +10,7 @@ export const fetchProfilePhotos = async (profile_id: string, page: number, per_p
                 per_page
             }
         })
-        return { data: api_response.data.data, hasMore: api_response.data.hasMore }
+        return { data: api_response.data.data.photos, hasMore: api_response.data.data.hasMore }
     } catch (error) {
         throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to fetch photos for the event :(")
     }

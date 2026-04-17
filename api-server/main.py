@@ -1,4 +1,5 @@
-from fastapi import FastAPI,WebSocket,WebSocketDisconnect
+from fastapi import FastAPI,WebSocket,WebSocketDisconnect,Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from routers.auth import auth_router
 from routers.organizer.space import organizer_space_router
@@ -17,7 +18,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],# In production, limit this to your frontend domain
+    allow_origins=["http://localhost:3000"],# In production, limit this to your frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -31,6 +32,9 @@ app.include_router(organizer_profile_router,prefix="/api/organizer/profiles")
 app.include_router(attendee_space_router,prefix="/api/attendee/spaces")
 app.include_router(attendee_profile_router,prefix="/api/attendee/profiles")
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(status_code=500,content={"detail":"Something went wrong!"})
 
 @app.get("/")
 async def root():

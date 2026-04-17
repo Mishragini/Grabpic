@@ -64,7 +64,6 @@ export default function EventDialog() {
       setTaskId(data.task_id);
       setCreatedEventId(data.event_id);
       createEventLoadingId.current = null;
-      queryClient.invalidateQueries({ queryKey: ["spaces"] });
     },
   });
 

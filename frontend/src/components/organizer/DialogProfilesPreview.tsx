@@ -29,7 +29,7 @@ export function DialogProfilePreview({
       )}
     >
       <img
-        src={page.photo_url}
+        src={page.public_url}
         alt=""
         className="h-auto max-h-40 w-full object-contain"
       />

@@ -25,7 +25,7 @@ export const fetchInconclusiveProfiles = async (event_id: string, page: number =
             }
         })
 
-        return { data: api_response.data.data, hasMore: api_response.data.hasMore }
+        return { data: api_response.data.data.face_crops, hasMore: api_response.data.data.hasMore }
     } catch (error) {
         throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to fetch inconclusive profiles :(")
     }
@@ -41,6 +41,5 @@ export const assignInconclusiveProfile = async (inconclusive_profile_id: string,
         return api_response.data
     } catch (error) {
         throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to fetch assign profile :(")
-
     }
 }

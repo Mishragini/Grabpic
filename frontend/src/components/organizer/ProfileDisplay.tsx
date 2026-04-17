@@ -16,7 +16,7 @@ export function DisplayProfile({
         {profiles.map((profile: Profile, i: number) => (
           <img
             key={profile.id}
-            src={profile.photo_url}
+            src={profile.public_url}
             alt=""
             className="relative size-9 shrink-0 rounded-full border-(--foam) object-cover shadow-sm"
             style={{ zIndex: count - i }}

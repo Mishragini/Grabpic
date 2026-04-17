@@ -1,6 +1,7 @@
 from celery import Celery,Task
 from typing import cast
 from lib.database import supabase
+from lib.config import settings
 import logging
 import numpy as np
 import inspireface as isf
@@ -9,6 +10,7 @@ import uuid
 import redis
 import json
 import base64
+import asyncio
 
 #redis client for pubsub
 redis_client = redis.Redis(host="localhost",port=6379, db=2)
@@ -23,18 +25,22 @@ celery_app = Celery(
 @celery_app.task(bind=True)
 def _process_photo(self,photos:list,event_id:str):
     task_id = self.request.id
+    total = len(photos)
+    
+    # Create a session with face recognition features
+    opt = isf.HF_ENABLE_FACE_RECOGNITION
+    session = isf.InspireFaceSession(opt, isf.HF_DETECT_MODE_ALWAYS_DETECT)
     try:
-        total = len(photos)
-        # Create a session with face recognition features
-        opt = isf.HF_ENABLE_FACE_RECOGNITION
-        session = isf.InspireFaceSession(opt, isf.HF_DETECT_MODE_ALWAYS_DETECT)
-
         #process each photo
         for index,  content in enumerate(photos,start=1):  
             #upload the photo to supabase storage
             filename = content["filename"] or f"{uuid.uuid4()}.jpg"
             content_type = content["content_type"] or "image/jpeg"
             storage_path=f"{event_id}/{filename}"
+            photo_url = f"{settings.SUPABASE_STORAGE_URL}/photos/{storage_path}"
+            
+            # decode once, reuse for both upload and face detection
+            image_bytes = base64.b64decode(content["data"])
             try:
                 supabase.storage.from_('photos').upload(storage_path, base64.b64decode(content["data"]), {"content-type": content_type})
             except Exception as e:
@@ -58,14 +64,12 @@ def _process_photo(self,photos:list,event_id:str):
                #add it in the db table
                 db_response = supabase.table("photos").insert({
                     "event_id": event_id,
-                    "storage_path":storage_path
+                    "storage_path":storage_path,
+                    "public_url":photo_url
                 }).execute()
                 photo_record = cast(dict,db_response.data[0])
                 photo_id = photo_record["id"]
             
-
-            #fetch the image bytes from supabase storage
-            image_bytes = supabase.storage.from_("photos").download(storage_path)
             #convert the image bytes to image array for cv2 to decode 
             image_array = np.frombuffer(image_bytes,dtype=np.uint8)
             # Load the image using OpenCV.
@@ -126,7 +130,6 @@ def _process_photo(self,photos:list,event_id:str):
                     face_bytes = buffer.tobytes()  
                    
                     face_crop_path = f"{event_id}/{photo_id}/{uuid.uuid4()}.jpg"
-
                     # filter on the basis of detection confidence -> store it in inconclusive storage for the orgnizer to review
                     if face.detection_confidence < 0.7:
                         supabase.storage.from_("inconclusive-crops").upload(
@@ -134,13 +137,18 @@ def _process_photo(self,photos:list,event_id:str):
                             face_bytes,
                             {"content-type": "image/jpeg"}
                         )
+                        inconclusive_crop_url = f"{settings.SUPABASE_STORAGE_URL}/inconclusive-crops/{face_crop_path}"
+                        
                         supabase.table("face_crops").insert({
                             "photo_id":photo_id,
                             "storage_path":face_crop_path,
                             "event_id":event_id,
-                            "embedding":embedding_list
+                            "embedding":embedding_list,
+                            "public_url":inconclusive_crop_url
                         }).execute()
                     else:
+                        face_crop_url = f"{settings.SUPABASE_STORAGE_URL}/face-crops/{face_crop_path}"
+                        
                         supabase.storage.from_("face-crops").upload(
                             face_crop_path,
                             face_bytes,
@@ -150,16 +158,19 @@ def _process_photo(self,photos:list,event_id:str):
                             "embedding":embedding_list,
                             "photo_id":photo_id,
                             "event_id":event_id,
-                            "representative_crop_path":face_crop_path
+                            "representative_crop_path":face_crop_path,
+                            "public_url":face_crop_url           
                         }).execute()
                         profile = cast(dict,db_response.data[0]) 
-                        matched_profile_id = profile["id"]  
-                #insert the map for non conclusive crops skip
-                if matched_profile_id:  
-                    supabase.table("face_photo_map").insert({
+                        matched_profile_id = profile["id"] 
+                         
+                if matched_profile_id:
+                    # guard against duplicate face_photo_map inserts on reprocessed photos
+                    supabase.table("face_photo_map").upsert({
                         "face_profile_id": matched_profile_id,
                         "photo_id": photo_id
-                    }).execute() 
+                    }, on_conflict="face_profile_id,photo_id").execute()
+                    
             #update the processed status of the photo    
             supabase.table("photos").update({
             "processed": True
@@ -186,6 +197,9 @@ def _process_photo(self,photos:list,event_id:str):
         err = json.dumps({"error": True})
         redis_client.set(f"task:{task_id}:latest", err)
         redis_client.publish(f"task:{task_id}:progress", err)
+        
+    finally:
+        session.release()    
     return
 
 
@@ -227,7 +241,7 @@ def _match_photo(image_bytes,event_id:str):
         url = supabase.storage.from_("face-crops").get_public_url(profile["representative_crop_path"])
         profile["photo_url"]=url
               
-    return {"message":"Matching photos fetched successfully","data":{"profile_id":profile["id"],"photo_url":profile["photo_url"]}}                       
+    return {"message":"Matching photos fetched successfully","data":{"profile_id":profile["id"],"photo_url":profile["public_url"]}}                       
 
 process_photo = cast(Task,_process_photo)
 

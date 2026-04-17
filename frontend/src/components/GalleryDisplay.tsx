@@ -35,7 +35,7 @@ export function GalleryDisplay({
             <div className="relative">
               <figure key={photo.id} className="mb-3 break-inside-avoid">
                 <img
-                  src={photo.photo_url}
+                  src={photo.public_url}
                   alt="Event capture"
                   className="h-auto w-full rounded-md object-contain"
                 />

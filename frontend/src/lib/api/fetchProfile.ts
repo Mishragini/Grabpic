@@ -11,7 +11,7 @@ export const fetchEventProfiles = async (event_id: string, page: number = 0, per
                 per_page
             }
         })
-        return { profiles: profile_response.data.data, hasMore: profile_response.data.hasMore }
+        return { profiles: profile_response.data.data.profiles, hasMore: profile_response.data.data.hasMore }
     } catch (error) {
         throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to get profiles :(")
     }

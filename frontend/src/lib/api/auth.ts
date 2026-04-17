@@ -4,7 +4,7 @@ import api from "./apiCall";
 export const fetchUser = async () => {
     try {
         const api_response = await api.get("api/auth/me")
-        return api_response.data
+        return api_response.data.data.user
     } catch (error) {
         throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Error while fetching user :(");
     }
