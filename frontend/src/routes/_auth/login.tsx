@@ -2,7 +2,7 @@ import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { login } from "#/lib/api/auth";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -27,6 +27,7 @@ export const Route = createFileRoute("/_auth/login")({
 function LoginComponent() {
   const loadingToastId = useRef<null | number | string>(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: (data: loginSchema) => login(data),
     onError: (error) => {
@@ -37,6 +38,7 @@ function LoginComponent() {
     onSuccess: () => {
       loadingToastId.current && toast.dismiss(loadingToastId.current);
       toast.success("Logged in!");
+      queryClient.invalidateQueries({ queryKey: ["user"] });
       navigate({ to: "/" });
       loadingToastId.current = null;
     },

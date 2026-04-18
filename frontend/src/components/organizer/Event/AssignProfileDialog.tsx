@@ -95,7 +95,7 @@ export function AssignProfile({ event_id }: { event_id: string }) {
     mutationFn: (data: { inconclusive_id: string; profile_id?: string }) =>
       assignInconclusiveProfile(data.inconclusive_id, data.profile_id),
     onError: (error) => {
-      toast.error(error.message);
+      toast.error(error?.message || "Failed to assign profile :(");
     },
     onSuccess: async () => {
       await Promise.all([

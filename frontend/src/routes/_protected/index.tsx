@@ -14,5 +14,5 @@ function App() {
         ? navigate({ to: "/organizer/dashboard" })
         : navigate({ to: "/attendee/invite" });
     }
-  }, [user]);
+  }, [user, navigate]);
 }

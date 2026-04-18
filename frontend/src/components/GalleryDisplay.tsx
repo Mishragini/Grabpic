@@ -4,6 +4,11 @@ import { InfiniteScrollLoader } from "./Loaders/InfiniteScrollLoader";
 import { DeletePhoto } from "./organizer/Event/DeletePhoto";
 import { useAppSelector } from "#/redux/hooks";
 import { selectUser } from "#/redux/userSlice";
+import { Button } from "./ui/button";
+import { Download } from "lucide-react";
+import { useCallback } from "react";
+import { useDownload } from "#/hooks/downloadPhoto";
+import { toast } from "sonner";
 
 interface GalleryDisplayProps {
   photos: Photo[];
@@ -17,6 +22,19 @@ export function GalleryDisplay({
   hasNextPage,
 }: GalleryDisplayProps) {
   const user = useAppSelector(selectUser);
+  const { download, downloading } = useDownload();
+  const handleDownload = useCallback(
+    async (id: string, url: string) => {
+      try {
+        await download(id, url);
+      } catch (error) {
+        const error_message =
+          error instanceof Error ? error.message : "Download Failed";
+        toast.error(error_message);
+      }
+    },
+    [download],
+  );
   return (
     <div
       id="gallery-scroll-target"
@@ -32,19 +50,32 @@ export function GalleryDisplay({
       >
         {photos.length > 0 ? (
           photos.map((photo: Photo) => (
-            <div className="relative">
-              <figure key={photo.id} className="mb-3 break-inside-avoid">
+            <div className="relative" key={photo.id}>
+              <figure className="mb-3 break-inside-avoid">
                 <img
                   src={photo.public_url}
                   alt="Event capture"
                   className="h-auto w-full rounded-md object-contain"
+                  loading="lazy"
+                  decoding="async"
                 />
               </figure>
-              {user?.role === Role.organizer && (
-                <div className="absolute right-0 top-0">
+              <div className="absolute right-0 top-0">
+                {user?.role === Role.attendee && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      handleDownload(photo.id, photo.public_url);
+                    }}
+                    disabled={downloading}
+                  >
+                    <Download />
+                  </Button>
+                )}
+                {user?.role === Role.organizer && (
                   <DeletePhoto photo_id={photo.id} event_id={photo.event_id} />
-                </div>
-              )}
+                )}
+              </div>
             </div>
           ))
         ) : (

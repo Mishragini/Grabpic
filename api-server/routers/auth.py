@@ -107,5 +107,6 @@ async def me(request:Request):
         
 @auth_router.get("/logout")
 async def logout(response:Response):
+    response = success_response_handler(message="Logged out successfully!")
     response.delete_cookie("auth-token")
-    return success_response_handler(message="Logged out successfully!")
+    return response

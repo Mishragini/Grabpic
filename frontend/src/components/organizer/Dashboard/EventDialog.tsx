@@ -3,7 +3,7 @@ import { Button } from "../../ui/button";
 import { Dialog } from "../../ui/dialog";
 import { useCallback, useRef, useState } from "react";
 import * as z from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { StepOne } from "./StepOne";
@@ -27,7 +27,6 @@ const createEventSchema = z.object({
 type createEventSchema = z.infer<typeof createEventSchema>;
 
 export default function EventDialog() {
-  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [task_id, setTaskId] = useState<string | null>(null);

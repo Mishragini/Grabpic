@@ -58,7 +58,7 @@ async def assign_profile(request:Annotated[AssignProfileReq,Body()]):
     if request.profile_id:
         profile_db_res,crops_db_res = await asyncio.gather(
             #check if profile_id exists in the db
-            asyncio.to_thread(supabase.table("face_profiles").select("storage_path").eq("id",request.profile_id).execute),
+            asyncio.to_thread(supabase.table("face_profiles").select("representative_crop_path").eq("id",request.profile_id).execute),
             #check if crop_id exists in the db
             asyncio.to_thread(supabase.table("face_crops")\
             .select("photo_id","embedding","event_id","storage_path")\
@@ -68,7 +68,7 @@ async def assign_profile(request:Annotated[AssignProfileReq,Body()]):
         if not profile_db_res.data:
             raise HTTPException(status_code=404,detail=f"Profile with id:{request.profile_id} not found")
         else:
-            storage_path = cast(dict,profile_db_res.data[0])["storage_path"] 
+            storage_path = cast(dict,profile_db_res.data[0])["representative_crop_path"] 
     
     else:
         #check if crop_id exists in the db

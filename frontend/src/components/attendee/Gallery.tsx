@@ -1,9 +1,13 @@
 import { fetchProfilePhotos } from "#/lib/api/attendee/photos";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { GalleryDisplay } from "../GalleryDisplay";
+import { Button } from "../ui/button";
+import { useDownload } from "#/hooks/downloadPhoto";
+import { toast } from "sonner";
 
 export function AttendeeGallery({ profile_id }: { profile_id: string }) {
+  const { downloadMultiple, downloading } = useDownload();
   const { data, isLoading, hasNextPage, fetchNextPage, isError } =
     useInfiniteQuery({
       queryKey: ["photos", profile_id],
@@ -16,6 +20,15 @@ export function AttendeeGallery({ profile_id }: { profile_id: string }) {
     if (!data) return [];
     return data?.pages.flatMap((page) => page.data);
   }, [data]);
+  const handleDownloadAll = useCallback(async () => {
+    try {
+      await downloadMultiple(photos);
+    } catch (error) {
+      const error_message =
+        error instanceof Error ? error.message : "Failed to download images :(";
+      toast.error(error_message);
+    }
+  }, [photos, downloadMultiple]);
   if (isLoading) {
     return (
       <div className="flex h-24 items-center rounded-lg border border-dashed border-(--line) bg-muted/20 px-3 text-sm text-muted-foreground">
@@ -28,11 +41,21 @@ export function AttendeeGallery({ profile_id }: { profile_id: string }) {
       {isError ? (
         <div> failed to fetch images</div>
       ) : (
-        <GalleryDisplay
-          photos={photos}
-          hasNextPage={hasNextPage}
-          fetchNextPage={fetchNextPage}
-        />
+        <div>
+          <div className="py-4 w-full flex justify-end">
+            <Button
+              onClick={handleDownloadAll}
+              disabled={photos.length <= 0 || downloading}
+            >
+              Download All
+            </Button>
+          </div>
+          <GalleryDisplay
+            photos={photos}
+            hasNextPage={hasNextPage}
+            fetchNextPage={fetchNextPage}
+          />
+        </div>
       )}
     </>
   );
