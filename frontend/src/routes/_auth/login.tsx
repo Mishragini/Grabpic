@@ -63,7 +63,10 @@ function LoginComponent() {
   };
   return (
     <main className="flex min-h-[calc(100vh-120px)] items-center justify-center px-4 py-12">
-      <form onSubmit={handleSubmit(handleLogin)} className="space-y-4">
+      <form
+        onSubmit={handleSubmit(handleLogin)}
+        className="w-full max-w-md space-y-4"
+      >
         <div className="text-center text-4xl font-semibold">Welcome Back!</div>
         <div className="space-y-2">
           <Label>Username</Label>
@@ -79,7 +82,7 @@ function LoginComponent() {
             <p className="text-destructive">{errors.password?.message}</p>
           )}
         </div>
-        <Button type="submit" className="w-md">
+        <Button type="submit" className="w-full">
           Login
         </Button>
         <p className="text-center text-sm text-muted-foreground">

@@ -42,8 +42,9 @@ export function AttendeeGallery({ profile_id }: { profile_id: string }) {
         <div> failed to fetch images</div>
       ) : (
         <div>
-          <div className="py-4 w-full flex justify-end">
+          <div className="flex w-full justify-end py-4">
             <Button
+              className="w-full sm:w-auto"
               onClick={handleDownloadAll}
               disabled={photos.length <= 0 || downloading}
             >

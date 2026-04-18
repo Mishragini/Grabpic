@@ -16,7 +16,7 @@ export function EventCard({
   return (
     <Card
       className={cn(
-        "flex h-full  min-h-48 max-w-xs flex-col overflow-hidden rounded-xl border border-(--line) bg-card/20 transition-[transform,box-shadow] duration-200",
+        "flex h-full min-h-48 w-full flex-col overflow-hidden rounded-xl border border-(--line) bg-card/20 transition-[transform,box-shadow] duration-200 sm:max-w-xs",
         "hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--line)_70%,var(--sea-ink)_30%)] hover:shadow-md",
       )}
     >

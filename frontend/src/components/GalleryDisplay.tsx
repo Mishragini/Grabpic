@@ -45,7 +45,7 @@ export function GalleryDisplay({
         hasMore={!!hasNextPage}
         loader={<InfiniteScrollLoader />}
         dataLength={photos.length}
-        className="columns-2 gap-3 sm:columns-3"
+        className="columns-1 gap-3 sm:columns-2 lg:columns-3"
         scrollableTarget="gallery-scroll-target"
       >
         {photos.length > 0 ? (

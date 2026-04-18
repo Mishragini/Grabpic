@@ -43,7 +43,7 @@ function RouteComponent() {
         hasMore={!!hasNextPage}
         loader={<InfiniteScrollLoader />}
       >
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 overflow-y-auto">
+        <div className="grid grid-cols-1 gap-4 overflow-y-auto sm:grid-cols-2 sm:gap-8 md:grid-cols-3 lg:grid-cols-4">
           {data?.pages.flat().map((event) => (
             <EventCard key={event?.id} event={event} />
           ))}

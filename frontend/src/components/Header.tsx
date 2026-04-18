@@ -26,15 +26,15 @@ export default function Header() {
   });
   return (
     <header className="sticky top-0 z-50 border-b border-[--line] bg-[--header-bg] px-4 backdrop-blur-lg">
-      <nav className="page-wrap flex justify-between flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
-        <div className="ml-auto flex items-center gap-1.5 sm:ml-0 sm:gap-2">
+      <nav className="page-wrap flex flex-wrap items-center justify-between gap-x-3 gap-y-2 py-3 sm:py-4">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <ThemeToggle />
         </div>
-        <div>
+        <div className="min-w-0">
           {user ? (
-            <div className="flex items-center gap-4">
+            <div className="flex max-w-full items-center gap-2 sm:gap-4">
               <Button
-                className="hover:cursor-pointer"
+                className="hover:cursor-pointer shrink-0"
                 size={"sm"}
                 disabled={isPending}
                 onClick={() => {
@@ -43,7 +43,7 @@ export default function Header() {
               >
                 {isPending ? "Logging out..." : "Logout"}
               </Button>
-              <div>{user.username}</div>
+              <div className="truncate text-sm">{user.username}</div>
               {user.avatar_url ? (
                 <div>
                   <img

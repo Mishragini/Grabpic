@@ -33,13 +33,13 @@ function RouteComponent() {
 
   return (
     <div className="page-wrap py-10 sm:py-12">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         {isError ? (
           <div>Failed to load event details</div>
         ) : (
           <EventHeader event={data} />
         )}
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
           <ShareEventDialog event={data} />
           <DeleteEvent event_id={event_id} />
         </div>

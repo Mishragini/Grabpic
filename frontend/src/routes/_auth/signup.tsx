@@ -89,7 +89,10 @@ export default function SignupComponent() {
 
   return (
     <main className="flex min-h-[calc(100vh-120px)] items-center justify-center px-4 py-12">
-      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+      <form
+        className="w-full max-w-md space-y-4"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <div className="text-center text-4xl font-semibold">Welcome!</div>
         <div className="space-y-2">
           <Label htmlFor="fullName">Full name</Label>

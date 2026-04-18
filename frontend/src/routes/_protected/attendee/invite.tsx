@@ -38,8 +38,8 @@ function RouteComponent() {
   }, []);
 
   return (
-    <div className=" h-screen w-full flex items-center justify-center  ">
-      <div>
+    <div className="flex h-screen w-full items-center justify-center px-4">
+      <div className="w-full max-w-md">
         <p className="island-kicker">Attendee Access</p>
         <h1 className="display-title mt-2 text-2xl text-foreground">
           Join your event
