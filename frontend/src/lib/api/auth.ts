@@ -32,7 +32,7 @@ export const signup = async (data: FormData) => {
 export const login = async (data: { username: string, password: string }) => {
     try {
         const response = await api.post("/api/auth/login", data)
-        return response.data
+        return response.data.data
     } catch (error) {
         throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Failed to login :(")
     }

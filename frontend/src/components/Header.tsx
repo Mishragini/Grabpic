@@ -1,7 +1,7 @@
 import ThemeToggle from "./ThemeToggle";
 import { useAppDispatch, useAppSelector } from "#/redux/hooks";
 import { Button } from "./ui/button";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { logout } from "#/lib/api/auth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -27,7 +27,10 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-[--line] bg-[--header-bg] px-4 backdrop-blur-lg">
       <nav className="page-wrap flex flex-wrap items-center justify-between gap-x-3 gap-y-2 py-3 sm:py-4">
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <Link to="/">
+            <img src="/grabpic.svg" className="w-16 h-16 svg-logo" />
+          </Link>
           <ThemeToggle />
         </div>
         <div className="min-w-0">
@@ -53,7 +56,9 @@ export default function Header() {
                   />
                 </div>
               ) : (
-                <div></div>
+                <div>
+                  <img src="/avatar.svg" className="h-6 w-6 svg-logo" />
+                </div>
               )}
             </div>
           ) : (

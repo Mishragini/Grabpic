@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader } from "#/components/ui/card";
 import { cn } from "#/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-
 import { Profiles } from "../Profiles";
 import { ShareEventDialog } from "../ShareEventDialog";
 import { DeleteEvent } from "../DeleteEvent";

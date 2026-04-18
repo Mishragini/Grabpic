@@ -14,7 +14,6 @@ import { Route as ProtectedIndexRouteImport } from './routes/_protected/index'
 import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ProtectedOrganizerDashboardRouteImport } from './routes/_protected/organizer/dashboard'
-import { Route as ProtectedAttendeeSelfieRouteImport } from './routes/_protected/attendee/selfie'
 import { Route as ProtectedAttendeeInviteRouteImport } from './routes/_protected/attendee/invite'
 import { Route as ProtectedOrganizerEventEventIdRouteImport } from './routes/_protected/organizer/event.$eventId'
 import { Route as ProtectedAttendeeEventEventIdProfileIdRouteImport } from './routes/_protected/attendee/event.$eventId.$profileId'
@@ -44,11 +43,6 @@ const ProtectedOrganizerDashboardRoute =
     path: '/organizer/dashboard',
     getParentRoute: () => ProtectedRoute,
   } as any)
-const ProtectedAttendeeSelfieRoute = ProtectedAttendeeSelfieRouteImport.update({
-  id: '/attendee/selfie',
-  path: '/attendee/selfie',
-  getParentRoute: () => ProtectedRoute,
-} as any)
 const ProtectedAttendeeInviteRoute = ProtectedAttendeeInviteRouteImport.update({
   id: '/attendee/invite',
   path: '/attendee/invite',
@@ -72,7 +66,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/signup': typeof AuthSignupRoute
   '/attendee/invite': typeof ProtectedAttendeeInviteRoute
-  '/attendee/selfie': typeof ProtectedAttendeeSelfieRoute
   '/organizer/dashboard': typeof ProtectedOrganizerDashboardRoute
   '/organizer/event/$eventId': typeof ProtectedOrganizerEventEventIdRoute
   '/attendee/event/$eventId/$profileId': typeof ProtectedAttendeeEventEventIdProfileIdRoute
@@ -82,7 +75,6 @@ export interface FileRoutesByTo {
   '/signup': typeof AuthSignupRoute
   '/': typeof ProtectedIndexRoute
   '/attendee/invite': typeof ProtectedAttendeeInviteRoute
-  '/attendee/selfie': typeof ProtectedAttendeeSelfieRoute
   '/organizer/dashboard': typeof ProtectedOrganizerDashboardRoute
   '/organizer/event/$eventId': typeof ProtectedOrganizerEventEventIdRoute
   '/attendee/event/$eventId/$profileId': typeof ProtectedAttendeeEventEventIdProfileIdRoute
@@ -94,7 +86,6 @@ export interface FileRoutesById {
   '/_auth/signup': typeof AuthSignupRoute
   '/_protected/': typeof ProtectedIndexRoute
   '/_protected/attendee/invite': typeof ProtectedAttendeeInviteRoute
-  '/_protected/attendee/selfie': typeof ProtectedAttendeeSelfieRoute
   '/_protected/organizer/dashboard': typeof ProtectedOrganizerDashboardRoute
   '/_protected/organizer/event/$eventId': typeof ProtectedOrganizerEventEventIdRoute
   '/_protected/attendee/event/$eventId/$profileId': typeof ProtectedAttendeeEventEventIdProfileIdRoute
@@ -106,7 +97,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/attendee/invite'
-    | '/attendee/selfie'
     | '/organizer/dashboard'
     | '/organizer/event/$eventId'
     | '/attendee/event/$eventId/$profileId'
@@ -116,7 +106,6 @@ export interface FileRouteTypes {
     | '/signup'
     | '/'
     | '/attendee/invite'
-    | '/attendee/selfie'
     | '/organizer/dashboard'
     | '/organizer/event/$eventId'
     | '/attendee/event/$eventId/$profileId'
@@ -127,7 +116,6 @@ export interface FileRouteTypes {
     | '/_auth/signup'
     | '/_protected/'
     | '/_protected/attendee/invite'
-    | '/_protected/attendee/selfie'
     | '/_protected/organizer/dashboard'
     | '/_protected/organizer/event/$eventId'
     | '/_protected/attendee/event/$eventId/$profileId'
@@ -176,13 +164,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedOrganizerDashboardRouteImport
       parentRoute: typeof ProtectedRoute
     }
-    '/_protected/attendee/selfie': {
-      id: '/_protected/attendee/selfie'
-      path: '/attendee/selfie'
-      fullPath: '/attendee/selfie'
-      preLoaderRoute: typeof ProtectedAttendeeSelfieRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
     '/_protected/attendee/invite': {
       id: '/_protected/attendee/invite'
       path: '/attendee/invite'
@@ -210,7 +191,6 @@ declare module '@tanstack/react-router' {
 interface ProtectedRouteChildren {
   ProtectedIndexRoute: typeof ProtectedIndexRoute
   ProtectedAttendeeInviteRoute: typeof ProtectedAttendeeInviteRoute
-  ProtectedAttendeeSelfieRoute: typeof ProtectedAttendeeSelfieRoute
   ProtectedOrganizerDashboardRoute: typeof ProtectedOrganizerDashboardRoute
   ProtectedOrganizerEventEventIdRoute: typeof ProtectedOrganizerEventEventIdRoute
   ProtectedAttendeeEventEventIdProfileIdRoute: typeof ProtectedAttendeeEventEventIdProfileIdRoute
@@ -219,7 +199,6 @@ interface ProtectedRouteChildren {
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedIndexRoute: ProtectedIndexRoute,
   ProtectedAttendeeInviteRoute: ProtectedAttendeeInviteRoute,
-  ProtectedAttendeeSelfieRoute: ProtectedAttendeeSelfieRoute,
   ProtectedOrganizerDashboardRoute: ProtectedOrganizerDashboardRoute,
   ProtectedOrganizerEventEventIdRoute: ProtectedOrganizerEventEventIdRoute,
   ProtectedAttendeeEventEventIdProfileIdRoute:

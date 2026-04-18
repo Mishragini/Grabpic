@@ -1,4 +1,3 @@
-import { getRouter } from '#/router'
 import axios from 'axios'
 
 const api = axios.create({
@@ -6,15 +5,15 @@ const api = axios.create({
     withCredentials: true
 })
 
-api.interceptors.response.use(
-    res => res,
-    err => {
-        if (err.response?.status === 401) {
-            const router = getRouter()
-            router.navigate({ to: "/login" })
-        }
-        return Promise.reject(err)
-    }
-)
+// api.interceptors.response.use(
+//     res => res,
+//     err => {
+//         if (err.response?.status === 401) {
+//             const router = getRouter()
+//             router.navigate({ to: "/login" })
+//         }
+//         return Promise.reject(err)
+//     }
+// )
 
 export default api

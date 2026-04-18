@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const dispatch = useAppDispatch();
-  const { isLoading, data, isError, error } = useQuery({
+  const { isLoading, data } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
       const data = await fetchUser();
@@ -25,6 +25,6 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   }, [data]);
   if (isLoading) {
     return <ScreenLoader loadingText="Loading your account" />;
-  } else if (isError) return <div>{error.message}</div>;
+  }
   return children;
 }
