@@ -70,7 +70,14 @@ async def signup(response:Response,
     
     response= success_response_handler(message="User registered successfully!",data={"token":token,"user_id":new_user_data["id"],"role":new_user_data["role"]})
     
-    response.set_cookie(key="auth-token",value=token)
+    response.set_cookie(
+    key="auth-token",
+    value=token,
+    httponly=True,        
+    secure=True,          
+    samesite="lax",       
+    max_age=60*60*24*7,   
+    )
     
     return response
 
@@ -95,7 +102,14 @@ async def login(user:LoginRequest,response:Response):
     
     response = success_response_handler(message="Logged in successfully",data= {"token":token,"user_id":existing_user_data["id"],"role":existing_user_data["role"]})
     
-    response.set_cookie(key="auth-token",value=token)
+    response.set_cookie(
+    key="auth-token",
+    value=token,
+    httponly=True,        
+    secure=True,          
+    samesite="lax",       
+    max_age=60*60*24*7,   
+    )
     
     return response
 

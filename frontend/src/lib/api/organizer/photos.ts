@@ -6,7 +6,7 @@ export const uploadPhotos = async (photos: File[], event_id: string) => {
         const form_data = new FormData()
         form_data.append("event_id", event_id)
         photos.forEach(photo => form_data.append("photos", photo))
-        const api_response = await api.post("/api/organizer/photos/upload", form_data, {
+        const api_response = await api.post("/organizer/photos/upload", form_data, {
             headers: {
                 "Content-Type": "multipart/form-data"
             }
@@ -19,7 +19,7 @@ export const uploadPhotos = async (photos: File[], event_id: string) => {
 
 export const fetchEventPhotos = async (event_id: string, page: number, per_page: number) => {
     try {
-        const api_response = await api.get("/api/organizer/photos", {
+        const api_response = await api.get("/organizer/photos", {
             params: {
                 event_id,
                 page,
@@ -34,7 +34,7 @@ export const fetchEventPhotos = async (event_id: string, page: number, per_page:
 
 export const deletePhoto = async (photo_id: string, event_id: string) => {
     try {
-        const api_response = await api.delete(`/api/organizer/photos/${photo_id}`, {
+        const api_response = await api.delete(`/organizer/photos/${photo_id}`, {
             params: {
                 event_id
             }

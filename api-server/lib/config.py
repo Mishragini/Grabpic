@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     SUPABASE_ANON_KEY:str= Field(init=False)
     SUPABASE_SERVICE_ROLE_KEY:str  = Field(init=False)
     JWT_SECRET_KEY:str= Field(init=False)
+    FRONTEND_URL:str = Field(init=False)
+    REDIS_HOST:str = Field(init=False)
     ALGORITHM : str = "HS256"
     
     @computed_field

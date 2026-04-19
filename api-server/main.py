@@ -8,6 +8,7 @@ from routers.attendee.photos import attendee_photo_router
 from routers.organizer.profiles import organizer_profile_router
 from routers.attendee.event import attendee_space_router
 from routers.attendee.profiles import attendee_profile_router
+from lib.config import settings
 import redis.asyncio as aioredis
 import json
 import logging
@@ -18,7 +19,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],# In production, limit this to your frontend domain
+    allow_origins=[settings.FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -44,7 +45,7 @@ async def root():
 @app.websocket("/ws/progress/{task_id}")
 async def websocket_endpoint(websocket:WebSocket,task_id:str):
     await websocket.accept()
-    client = aioredis.Redis(host="localhost", port=6379, db=2)
+    client = aioredis.Redis(host=settings.REDIS_HOST, port=6379, db=2)
     pubsub= client.pubsub()
     await pubsub.subscribe(f"task:{task_id}:progress")
 

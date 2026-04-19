@@ -10,15 +10,16 @@ import uuid
 import redis
 import json
 import base64
-import asyncio
+
+REDIS_HOST = settings.REDIS_HOST
 
 #redis client for pubsub
-redis_client = redis.Redis(host="localhost",port=6379, db=2)
+redis_client = redis.Redis(host=REDIS_HOST,port=6379, db=2)
 
 celery_app = Celery(
     "grabpic",
-    broker="redis://localhost:6379/0",
-    backend="redis://localhost:6379/1" 
+    broker=f"redis://{REDIS_HOST}:6379/0",
+    backend=f"redis://{REDIS_HOST}:6379/1" 
 )
 
 #bind= True is for reading the task id 

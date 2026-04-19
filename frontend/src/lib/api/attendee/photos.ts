@@ -3,7 +3,7 @@ import api from "../apiCall"
 
 export const fetchProfilePhotos = async (profile_id: string, page: number, per_page: number) => {
     try {
-        const api_response = await api.get("/api/attendee/photos", {
+        const api_response = await api.get("/attendee/photos", {
             params: {
                 profile_id,
                 page,
