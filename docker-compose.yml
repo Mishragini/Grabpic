@@ -16,6 +16,9 @@ services:
       - redis
     expose:
       - "8000"
+    # Uncomment for local dev
+    # ports:
+    #   - "8000:8000"
 
   worker:
     build: ./api-server
@@ -30,11 +33,16 @@ services:
 
   frontend:
     build: ./frontend
+    command: bun run start
     restart: always
     env_file: ./frontend/.env
     expose:
       - "3000"
+    # Uncomment for local
+    # ports:
+    #   - "3000:3000"
 
+  #comment out for local development
   nginx:
     image: nginx:alpine
     restart: always

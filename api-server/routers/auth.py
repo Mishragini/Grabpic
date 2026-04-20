@@ -74,7 +74,7 @@ async def signup(response:Response,
     key="auth-token",
     value=token,
     httponly=True,        
-    secure=True,          
+    secure=True,   #comment out for local development       
     samesite="lax",       
     max_age=60*60*24*7,   
     )
@@ -106,7 +106,7 @@ async def login(user:LoginRequest,response:Response):
     key="auth-token",
     value=token,
     httponly=True,        
-    secure=True,          
+    secure=True,    #comment out for local dev 
     samesite="lax",       
     max_age=60*60*24*7,   
     )

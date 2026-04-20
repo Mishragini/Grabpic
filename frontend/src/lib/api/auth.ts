@@ -3,7 +3,7 @@ import api from "./apiCall";
 
 export const fetchUser = async () => {
     try {
-        const api_response = await api.get("api/auth/me")
+        const api_response = await api.get("/auth/me")
         return api_response.data.data.user
     } catch (error) {
         throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Error while fetching user :(");
@@ -14,7 +14,7 @@ export const fetchUser = async () => {
 
 export const signup = async (data: FormData) => {
     try {
-        const api_response = await api.post("api/auth/signup",
+        const api_response = await api.post("/auth/signup",
             data,
             {
                 headers: {

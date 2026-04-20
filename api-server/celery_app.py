@@ -238,9 +238,6 @@ def _match_photo(image_bytes,event_id:str):
     
     profile = match[0]
     
-    if profile:
-        url = supabase.storage.from_("face-crops").get_public_url(profile["representative_crop_path"])
-        profile["photo_url"]=url
               
     return {"message":"Matching photos fetched successfully","data":{"profile_id":profile["id"],"photo_url":profile["public_url"]}}                       
 
