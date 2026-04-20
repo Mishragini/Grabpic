@@ -86,4 +86,31 @@ async def delete_bucket_folder(bucket:str,folder_prefix:str):
     return
 
 def success_response_handler(data=None,message="Success",status_code=200):
-    return JSONResponse(status_code=status_code,content={"message":message,"data":data})                                         
+    return JSONResponse(status_code=status_code,content={"message":message,"data":data})
+
+async def handle_profile(profile_id: str,photo_id:str):
+    other_link_res = await asyncio.to_thread(
+        supabase.table("face_photo_map")
+            .select("photo_id")
+            .eq("face_profile_id", profile_id)
+            .neq("photo_id", photo_id)
+            .limit(1)
+            .execute
+    )
+
+    if not other_link_res.data:
+        profile_res = await asyncio.to_thread(
+            supabase.table("face_profiles")
+                .select("representative_crop_path")
+                .eq("id", profile_id)
+                .execute
+        )
+        if profile_res.data:
+            crop_path = cast(dict, profile_res.data[0])["representative_crop_path"]
+            if crop_path:
+                await asyncio.to_thread(
+                    supabase.storage.from_("face-crops").remove, [crop_path]
+                )
+        await asyncio.to_thread(
+            supabase.table("face_profiles").delete().eq("id", profile_id).execute
+        )                                         

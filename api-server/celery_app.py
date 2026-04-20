@@ -157,7 +157,6 @@ def _process_photo(self,photos:list,event_id:str):
                         )
                         db_response= supabase.table("face_profiles").insert({
                             "embedding":embedding_list,
-                            "photo_id":photo_id,
                             "event_id":event_id,
                             "representative_crop_path":face_crop_path,
                             "public_url":face_crop_url           

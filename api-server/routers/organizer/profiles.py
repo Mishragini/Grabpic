@@ -98,7 +98,6 @@ async def assign_profile(request:Annotated[AssignProfileReq,Body()]):
             storage_path,
             storage_image),
             asyncio.to_thread(supabase.table("face_profiles").insert({
-            "photo_id":photo_id,
             "embedding":embedding,
             "event_id":event_id,
             "representative_crop_path":storage_path,

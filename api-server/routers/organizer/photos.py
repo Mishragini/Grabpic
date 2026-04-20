@@ -3,7 +3,7 @@ from lib.middleware import authMiddleware,organizerMiddleware
 from lib.database import supabase
 from typing import Annotated,cast
 from celery_app import process_photo
-from lib.utils import is_image,check_event,delete_bucket_folder,success_response_handler
+from lib.utils import is_image,check_event,delete_bucket_folder,success_response_handler,handle_profile
 import base64
 import asyncio
     
@@ -73,9 +73,17 @@ async def delete_photo(req:Request,photo_id:str,event_id:Annotated[str,Query()])
     
     photo = cast(dict,photo_db_res.data[0])
     
+    #Find all face profiles linked to this photo
+    mapped_profiles_res = await asyncio.to_thread(supabase.table("face_photo_map") \
+        .select("face_profile_id") \
+        .eq("photo_id", photo_id) \
+        .execute)
+    
+    profile_ids = [r["face_profile_id"] for r in cast(list[dict], mapped_profiles_res.data)]
+  
+    await asyncio.gather(*[handle_profile(pid,photo_id) for pid in profile_ids])
     await asyncio.gather(
         asyncio.to_thread(delete_bucket_folder,"photos",photo["storage_path"]),
-        asyncio.to_thread(delete_bucket_folder,"face-crops",f"{event_id}/{photo_id}"),
         asyncio.to_thread(delete_bucket_folder,"inconclusive-crops",f"{event_id}/{photo_id}")
     )
     
