@@ -19,7 +19,7 @@ export const uploadPhotos = async (photos: File[], event_id: string) => {
 
 export const fetchEventPhotos = async (event_id: string, page: number, per_page: number) => {
     try {
-        const api_response = await api.get("/organizer/photos", {
+        const api_response = await api.get("/organizer/photos/", {
             params: {
                 event_id,
                 page,

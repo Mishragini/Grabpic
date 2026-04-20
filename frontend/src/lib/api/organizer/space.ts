@@ -3,7 +3,7 @@ import api from "../apiCall"
 
 export const getSpaces = async (page: number, per_page: number) => {
     try {
-        const api_response = await api.get("/organizer/spaces", {
+        const api_response = await api.get("/organizer/spaces/", {
             params: {
                 page,
                 per_page
@@ -17,7 +17,7 @@ export const getSpaces = async (page: number, per_page: number) => {
 
 export const createSpace = async (data: { name: string }) => {
     try {
-        const api_response = await api.post("/organizer/spaces", data)
+        const api_response = await api.post("/organizer/spaces/", data)
         return api_response.data.data.event
     } catch (error) {
         throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to create event :(")

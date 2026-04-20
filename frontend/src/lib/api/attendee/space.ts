@@ -3,7 +3,7 @@ import api from "../apiCall"
 
 export const fetchEventByInviteCode = async (invite_code: string) => {
     try {
-        const api_response = await api.get("/attendee/spaces", {
+        const api_response = await api.get("/attendee/spaces/", {
             params: {
                 invite_code
             }
