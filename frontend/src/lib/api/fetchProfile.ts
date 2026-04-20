@@ -4,7 +4,7 @@ import type { Role } from "../types/type"
 
 export const fetchEventProfiles = async (event_id: string, page: number = 0, per_page: number = 10, role: Role) => {
     try {
-        const profile_response = await api.get(`/${role}/profiles`, {
+        const profile_response = await api.get(`/${role}/profiles/`, {
             params: {
                 event_id,
                 page,
