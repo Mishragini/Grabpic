@@ -13,9 +13,9 @@ export function InconclusiveProfile({ event_id }: { event_id: string }) {
   const { inconclusive_profiles, count, hasMore } = useMemo(() => {
     if (!data) return { inconclusive_profiles: [], count: 0, hasMore: false };
     return {
-      inconclusive_profiles: data.data,
-      count: data.data.length,
-      hasMore: data.hasMore,
+      inconclusive_profiles: data?.data ?? [],
+      count: data?.data?.length ?? 0,
+      hasMore: data?.hasMore ?? false,
     };
   }, [data]);
 

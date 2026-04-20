@@ -27,7 +27,7 @@ export function StepThree({ event_name, photos }: StepThreeProps) {
         <div className="space-y-1">
           <p className="island-kicker text-[0.65rem]">Photos</p>
           <p className="text-sm text-muted-foreground">
-            {photos?.length} file{photos.length === 1 ? "" : "s"} selected
+            {photos?.length} file{(photos?.length ?? 0) === 1 ? "" : "s"} selected
           </p>
         </div>
       </div>

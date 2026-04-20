@@ -31,7 +31,7 @@ export function ProfileOptions({
 
   const { profiles, total_loaded } = useMemo(() => {
     if (!data) return { profiles: [], total_loaded: 0 };
-    const profiles = data?.pages.flatMap((p) => p?.profiles);
+    const profiles = data?.pages.flatMap((p) => p?.profiles ?? []);
     return { profiles, total_loaded: profiles.length };
   }, [data]);
 

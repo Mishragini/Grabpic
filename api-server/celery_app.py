@@ -234,12 +234,12 @@ def _match_photo(image_bytes,event_id:str):
     match = cast(list[dict], rpc_res.data)
     
     if not match:
-        raise ValueError("No matching profile found")
+        return {"success": False, "error": "No matching profile found"}
     
     profile = match[0]
     
               
-    return {"message":"Matching photos fetched successfully","data":{"profile_id":profile["id"],"photo_url":profile["public_url"]}}                       
+    return {"success": True,"message":"Matching photos fetched successfully","data":{"profile_id":profile["id"],"photo_url":profile["public_url"]}}                       
 
 process_photo = cast(Task,_process_photo)
 

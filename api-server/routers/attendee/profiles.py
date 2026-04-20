@@ -13,13 +13,14 @@ async def match_selfie(photo:Annotated[UploadFile,File()],event_id:Annotated[str
     task = match_photo.delay(image_bytes,event_id)
     try:
         result = await asyncio.get_running_loop().run_in_executor(None,lambda:task.get(timeout=30,propagate=True))
-    except ValueError as e :
-            raise HTTPException(status_code=400,detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="Something went wrong!")
     
     if not isinstance(result,dict):
          raise HTTPException(status_code=500, detail="Something went wrong!")
+     
+    if not result.get("success"):
+        raise HTTPException(status_code=404, detail=result.get("error", "Match failed"))
     
     return success_response_handler(message = result["message"], data = result["data"]) 
 

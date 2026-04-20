@@ -17,7 +17,7 @@ function RouteComponent() {
     queryFn: ({ pageParam }) => getSpaces(pageParam, 24),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
-      lastPage.length === 24 ? lastPageParam + 1 : undefined,
+      (lastPage?.length ?? 0) === 24 ? lastPageParam + 1 : undefined,
   });
 
   if (isLoading) {
@@ -38,13 +38,13 @@ function RouteComponent() {
         <EventDialog />
       </div>
       <InfiniteScroll
-        dataLength={data?.pages.flat().length!}
+        dataLength={data?.pages?.flat()?.length ?? 0}
         next={fetchNextPage}
         hasMore={!!hasNextPage}
         loader={<InfiniteScrollLoader />}
       >
         <div className="grid grid-cols-1 gap-4 overflow-y-auto sm:grid-cols-2 sm:gap-8 md:grid-cols-3 lg:grid-cols-4">
-          {data?.pages.flat().map((event) => (
+          {(data?.pages?.flat() ?? []).map((event) => (
             <EventCard key={event?.id} event={event} />
           ))}
         </div>

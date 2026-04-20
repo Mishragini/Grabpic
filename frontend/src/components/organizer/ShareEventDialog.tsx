@@ -26,8 +26,12 @@ export function ShareEventDialog({ event }: { event: Event }) {
       toast.error("Clipboard is not available.");
       return;
     }
+    if (!event?.invite_code) {
+      toast.error("Invite code is not available.");
+      return;
+    }
     try {
-      await navigator.clipboard.writeText(event?.invite_code);
+      await navigator.clipboard.writeText(event.invite_code);
       setCopied(true);
     } catch {
       toast.error("Could not copy.");

@@ -8,11 +8,14 @@ export const createEvent = async ({ name, photos }: {
 }) => {
     try {
         const space_response = await createSpace({ name })
-        const event_id = space_response.id
+        const event_id = space_response?.id
+        if (!event_id) {
+            throw new Error("Event creation succeeded but event id was missing.")
+        }
         const upload_response = await uploadPhotos(photos, event_id)
         console.log("upload response...", upload_response)
-        return { task_id: upload_response.task_id, event_id }
+        return { task_id: upload_response?.task_id, event_id }
     } catch (error) {
-        throw new Error(error instanceof AxiosError ? error.response?.data.detail : error instanceof Error ? error.message : "Failed to create Event :(")
+        throw new Error(error instanceof AxiosError ? error.response?.data?.detail : error instanceof Error ? error.message : "Failed to create Event :(")
     }
 }

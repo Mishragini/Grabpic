@@ -38,9 +38,9 @@ export function Profiles({
   const { profiles, count, hasMore } = useMemo(() => {
     if (!data) return { profiles: [], count: 0, hasMore: false };
     return {
-      profiles: data.profiles,
-      count: data.profiles.length,
-      hasMore: data.hasMore,
+      profiles: data?.profiles ?? [],
+      count: data?.profiles?.length ?? 0,
+      hasMore: data?.hasMore ?? false,
     };
   }, [data]);
   return (

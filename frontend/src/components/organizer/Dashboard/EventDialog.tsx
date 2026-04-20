@@ -58,6 +58,11 @@ export default function EventDialog() {
     onSuccess: (data) => {
       createEventLoadingId.current &&
         toast.dismiss(createEventLoadingId.current);
+      if (!data?.task_id || !data?.event_id) {
+        toast.error("Event created but response was incomplete.");
+        createEventLoadingId.current = null;
+        return;
+      }
       toast.success("Event created!");
       setStep((c) => c + 1);
       setTaskId(data.task_id);

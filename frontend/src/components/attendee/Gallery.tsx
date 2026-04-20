@@ -14,11 +14,11 @@ export function AttendeeGallery({ profile_id }: { profile_id: string }) {
       initialPageParam: 0,
       queryFn: ({ pageParam }) => fetchProfilePhotos(profile_id, pageParam, 6),
       getNextPageParam: (lastPage, _, lastPageParam) =>
-        lastPage.hasMore ? lastPageParam + 1 : undefined,
+        lastPage?.hasMore ? lastPageParam + 1 : undefined,
     });
   const photos = useMemo(() => {
     if (!data) return [];
-    return data?.pages.flatMap((page) => page.data);
+    return data?.pages.flatMap((page) => page?.data ?? []);
   }, [data]);
   const handleDownloadAll = useCallback(async () => {
     try {

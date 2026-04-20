@@ -9,7 +9,7 @@ export const getSpaces = async (page: number, per_page: number) => {
                 per_page
             }
         })
-        return api_response.data.data.events
+        return api_response.data?.data?.events
     } catch (error) {
         throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Failed to fetch the events:(")
     }
@@ -18,16 +18,16 @@ export const getSpaces = async (page: number, per_page: number) => {
 export const createSpace = async (data: { name: string }) => {
     try {
         const api_response = await api.post("/organizer/spaces/", data)
-        return api_response.data.data.event
+        return api_response.data?.data?.event
     } catch (error) {
-        throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to create event :(")
+        throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Failed to create event :(")
     }
 }
 
 export const getSpaceById = async (event_id: string) => {
     try {
         const api_response = await api.get(`/organizer/spaces/${event_id}`)
-        return api_response.data.data.event
+        return api_response.data?.data?.event
     } catch (error) {
         throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Failed to fetch the event:(")
 

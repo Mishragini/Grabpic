@@ -47,6 +47,10 @@ export function UploadPhotoDilaog({ event_id }: { event_id: string }) {
       toast.error(e.message);
     },
     onSuccess: (data) => {
+      if (!data?.task_id) {
+        toast.error("Upload succeeded but task id was missing.");
+        return;
+      }
       setTaskId(data.task_id);
       setStep((c) => c + 1);
       toast.success("Photos uploaded successfully!");

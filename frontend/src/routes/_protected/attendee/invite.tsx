@@ -33,6 +33,9 @@ function RouteComponent() {
 
   const fetchEvent = useCallback(async (data: inviteCodeSchem) => {
     const res = await fetchEventByInviteCode(data.invite_code);
+    if (!res?.id) {
+      return;
+    }
     setEventId(res.id);
     setDialogOpen(true);
   }, []);

@@ -15,8 +15,8 @@ export const matchSelfie = async (photo_url: string, event_id: string) => {
         form_data.append("event_id", event_id)
 
         const api_response = await api.post("/attendee/profiles/match-selfie", form_data)
-        return api_response.data.data
+        return api_response.data?.data
     } catch (error) {
-        throw new Error(error instanceof AxiosError ? error.response?.data.detail : "Failed to fetch matching profile")
+        throw new Error(error instanceof AxiosError ? error.response?.data?.detail : "Failed to fetch matching profile")
     }
 }

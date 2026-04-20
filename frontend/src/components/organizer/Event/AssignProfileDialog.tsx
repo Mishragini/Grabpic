@@ -68,7 +68,7 @@ export function AssignProfile({ event_id }: { event_id: string }) {
     queryFn: ({ pageParam }) =>
       fetchInconclusiveProfiles(event_id, pageParam, 6),
     getNextPageParam: (lastPage, _, lastPageParam) =>
-      lastPage.hasMore ? lastPageParam + 1 : undefined,
+      lastPage?.hasMore ? lastPageParam + 1 : undefined,
   });
 
   const toggleProfile = useCallback(
@@ -82,12 +82,12 @@ export function AssignProfile({ event_id }: { event_id: string }) {
 
   const inconclusive_profiles = useMemo(() => {
     if (!inconclusive_data) return [];
-    return inconclusive_data.pages.flatMap((page) => page.data);
+    return inconclusive_data.pages.flatMap((page) => page?.data ?? []);
   }, [inconclusive_data]);
 
   const profiles = useMemo(() => {
     if (!data) return [];
-    return data.pages.flatMap((page) => page?.profiles);
+    return data.pages.flatMap((page) => page?.profiles ?? []);
   }, [data]);
 
   const { mutate, isPending: isAssigning } = useMutation({

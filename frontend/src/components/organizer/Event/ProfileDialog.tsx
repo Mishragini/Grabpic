@@ -58,7 +58,7 @@ export function ProfileDialog({ event_id }: { event_id: string }) {
   }, []);
 
   const profiles = useMemo(
-    () => data?.pages.flatMap((p) => p?.profiles) ?? [],
+    () => data?.pages.flatMap((p) => p?.profiles ?? []) ?? [],
     [data],
   );
 
