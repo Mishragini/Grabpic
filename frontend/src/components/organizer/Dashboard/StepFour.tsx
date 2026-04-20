@@ -22,7 +22,9 @@ export function StepFour({
   const [completed, setCompleted] = useState(false);
   const [error, setError] = useState(false);
   useEffect(() => {
-    const ws = new WebSocket(`ws://localhost:8000/ws/progress/${task_id}`);
+    const ws = new WebSocket(
+      `${import.meta.env.VITE_BASE_WS}/ws/progress/${task_id}`,
+    );
     ws.onmessage = (event) => {
       let data: {
         processed?: number;
