@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as HealthRouteImport } from './routes/health'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as ProtectedIndexRouteImport } from './routes/_protected/index'
 import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
@@ -18,6 +19,11 @@ import { Route as ProtectedAttendeeInviteRouteImport } from './routes/_protected
 import { Route as ProtectedOrganizerEventEventIdRouteImport } from './routes/_protected/organizer/event.$eventId'
 import { Route as ProtectedAttendeeEventEventIdProfileIdRouteImport } from './routes/_protected/attendee/event.$eventId.$profileId'
 
+const HealthRoute = HealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
   getParentRoute: () => rootRouteImport,
@@ -63,6 +69,7 @@ const ProtectedAttendeeEventEventIdProfileIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof ProtectedIndexRoute
+  '/health': typeof HealthRoute
   '/login': typeof AuthLoginRoute
   '/signup': typeof AuthSignupRoute
   '/attendee/invite': typeof ProtectedAttendeeInviteRoute
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/attendee/event/$eventId/$profileId': typeof ProtectedAttendeeEventEventIdProfileIdRoute
 }
 export interface FileRoutesByTo {
+  '/health': typeof HealthRoute
   '/login': typeof AuthLoginRoute
   '/signup': typeof AuthSignupRoute
   '/': typeof ProtectedIndexRoute
@@ -82,6 +90,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_protected': typeof ProtectedRouteWithChildren
+  '/health': typeof HealthRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/signup': typeof AuthSignupRoute
   '/_protected/': typeof ProtectedIndexRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/health'
     | '/login'
     | '/signup'
     | '/attendee/invite'
@@ -102,6 +112,7 @@ export interface FileRouteTypes {
     | '/attendee/event/$eventId/$profileId'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/health'
     | '/login'
     | '/signup'
     | '/'
@@ -112,6 +123,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_protected'
+    | '/health'
     | '/_auth/login'
     | '/_auth/signup'
     | '/_protected/'
@@ -123,12 +135,20 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRouteWithChildren
+  HealthRoute: typeof HealthRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/health': {
+      id: '/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_protected': {
       id: '/_protected'
       path: ''
@@ -211,6 +231,7 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   ProtectedRoute: ProtectedRouteWithChildren,
+  HealthRoute: HealthRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
 }
